@@ -123,6 +123,14 @@ Important: this is a simple access gate for a static website. It keeps the plain
 
 For stronger protection, use a service with real authentication, such as Cloudflare Access, Netlify password protection, Vercel authentication, or a private internal app.
 
+## Saved Estimates Storage
+
+Saved estimates are stored locally in the browser on the same computer using browser storage. They remain after closing and reopening the browser, and they stay saved until they are deleted from the app or the browser's site data is manually cleared.
+
+Use the same browser and the same website address to see the same saved estimates. Local testing at `localhost` and the deployed GitHub Pages site have separate browser storage.
+
+The app also asks the browser for persistent storage to reduce the chance that saved estimates are cleared automatically.
+
 ## Test Locally With `.env`
 
 For local testing, `index.html` tries to read `.env` from the same folder.

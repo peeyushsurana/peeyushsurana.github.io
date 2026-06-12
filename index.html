@@ -524,6 +524,36 @@
       color: var(--red);
     }
 
+    .summary-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(15, 23, 42, 0.36);
+    }
+
+    .summary-modal {
+      width: min(390px, 100%);
+      padding: 22px;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 22px 50px rgba(23, 32, 51, 0.22);
+    }
+
+    .summary-modal h3 {
+      margin: 0 0 14px;
+      font-size: 20px;
+    }
+
+    .summary-modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+
     th,
     td {
       text-align: left;
@@ -875,17 +905,20 @@
       }
     }
 
-    @page {
-      size: A4;
-      margin: 12mm;
-    }
-
     @media print {
       html,
       body {
+        background: #ffffff;
+      }
+
+      body.print-a4 {
         width: 210mm;
         min-height: 297mm;
-        background: #ffffff;
+      }
+
+      body.print-a5 {
+        width: 148mm;
+        min-height: 210mm;
       }
 
       body {
@@ -917,6 +950,42 @@
 
       .invoice-header-art {
         width: 300px;
+      }
+
+      body.print-a5 .invoice-header-art {
+        width: 230px;
+      }
+
+      body.print-a5 .invoice-head {
+        gap: 12px;
+        padding-bottom: 12px;
+      }
+
+      body.print-a5 .party-row {
+        padding: 12px 0;
+      }
+
+      body.print-a5 .invoice-table {
+        margin-top: 12px;
+        font-size: 10.5px;
+      }
+
+      body.print-a5 .invoice-table th,
+      body.print-a5 .invoice-table td {
+        padding: 7px 5px;
+      }
+
+      body.print-a5 .total-area {
+        margin-top: 12px;
+      }
+
+      body.print-a5 .total-table td {
+        padding: 5px 0;
+      }
+
+      body.print-a5 .terms {
+        margin-top: 12px;
+        padding-top: 9px;
       }
 
       .invoice-table {
@@ -1315,6 +1384,7 @@
     initializeAccessGate();
 
     function startApp() {
+      requestPersistentStorage();
       bindStaticFields();
       bindPaymentFields();
       render();
@@ -1338,16 +1408,17 @@
         state.estimateDate = todayIso();
         savePrintedEstimate();
         render();
+        applyPrintPaperSize();
         shouldAdvanceAfterPrint = true;
         window.print();
       });
 
       downloadDaySummaryBtn.addEventListener("click", () => {
-        downloadSummaryFile("day");
+        showSummaryPeriodPicker("day");
       });
 
       downloadMonthSummaryBtn.addEventListener("click", () => {
-        downloadSummaryFile("month");
+        showSummaryPeriodPicker("month");
       });
 
       document.addEventListener("click", (event) => {
@@ -1357,6 +1428,7 @@
       });
 
       window.addEventListener("afterprint", () => {
+        clearPrintPaperSize();
         if (restoreStateAfterReprint) {
           state = restoreStateAfterReprint;
           restoreStateAfterReprint = null;
@@ -1757,6 +1829,7 @@
       restoreStateAfterReprint = structuredClone(state);
       state = createStateFromPrintedEstimate(record, restoreStateAfterReprint);
       render(false, false);
+      applyPrintPaperSize();
       window.print();
     }
 
@@ -1792,24 +1865,31 @@
       localStorage.setItem(storageKey, JSON.stringify(state));
     }
 
+    async function requestPersistentStorage() {
+      if (!navigator.storage || !navigator.storage.persist) return;
+      try {
+        await navigator.storage.persist();
+      } catch {}
+    }
+
     function loadState() {
       try {
         const saved = JSON.parse(localStorage.getItem(storageKey));
         if (!saved || typeof saved !== "object") return structuredClone(defaultState);
         const shouldResetNumber = saved.numberResetVersion !== NUMBER_RESET_VERSION;
-        if (shouldResetNumber) return structuredClone(defaultState);
-        const estimateSerial = shouldResetNumber ? 1 : Number(saved.estimateSerial) || serialFromEstimateNo(saved.estimateNo) || defaultState.estimateSerial;
+        const printedEstimates = Array.isArray(saved.printedEstimates) ? saved.printedEstimates.map(normalizePrintedEstimate) : [];
+        const estimateSerial = shouldResetNumber ? printedEstimates.length + 1 : Number(saved.estimateSerial) || serialFromEstimateNo(saved.estimateNo) || defaultState.estimateSerial;
         return {
           ...structuredClone(defaultState),
           estimateSerial,
           estimateNo: createEstimateNo(estimateSerial),
           estimateDate: todayIso(),
-          customerName: saved.customerName || "",
-          customerPhone: saved.customerPhone || "",
-          items: Array.isArray(saved.items) && saved.items.length ? saved.items.map(normalizeItem) : structuredClone(defaultState.items),
-          oldGoldItems: Array.isArray(saved.oldGoldItems) && saved.oldGoldItems.length ? saved.oldGoldItems.map(normalizeOldGoldItem) : structuredClone(defaultState.oldGoldItems),
-          payments: normalizePayments(saved.payments),
-          printedEstimates: Array.isArray(saved.printedEstimates) ? saved.printedEstimates.map(normalizePrintedEstimate) : [],
+          customerName: shouldResetNumber ? "" : saved.customerName || "",
+          customerPhone: shouldResetNumber ? "" : saved.customerPhone || "",
+          items: !shouldResetNumber && Array.isArray(saved.items) && saved.items.length ? saved.items.map(normalizeItem) : structuredClone(defaultState.items),
+          oldGoldItems: !shouldResetNumber && Array.isArray(saved.oldGoldItems) && saved.oldGoldItems.length ? saved.oldGoldItems.map(normalizeOldGoldItem) : structuredClone(defaultState.oldGoldItems),
+          payments: shouldResetNumber ? normalizePayments(defaultState.payments) : normalizePayments(saved.payments),
+          printedEstimates,
           numberResetVersion: NUMBER_RESET_VERSION
         };
       } catch {
@@ -2005,11 +2085,51 @@
       };
     }
 
-    function downloadSummaryFile(mode) {
+    function showSummaryPeriodPicker(mode) {
+      closeSummaryPeriodPicker();
+      const isMonth = mode === "month";
+      const currentValue = isMonth ? todayIso().slice(0, 7) : todayIso();
+      const backdrop = document.createElement("div");
+      backdrop.className = "summary-modal-backdrop";
+      backdrop.innerHTML = `
+        <form class="summary-modal" id="summaryPeriodForm">
+          <h3>${isMonth ? "Month Summary" : "Day Summary"}</h3>
+          <div class="field">
+            <label for="summaryPeriodInput">${isMonth ? "Select month" : "Select date"}</label>
+            <input id="summaryPeriodInput" type="${isMonth ? "month" : "date"}" value="${escapeAttribute(currentValue)}" required>
+          </div>
+          <div class="summary-modal-actions">
+            <button class="btn" type="button" data-summary-cancel>Cancel</button>
+            <button class="btn btn-primary" type="submit">Download</button>
+          </div>
+        </form>
+      `;
+      document.body.appendChild(backdrop);
+      const input = backdrop.querySelector("#summaryPeriodInput");
+      input.focus();
+
+      backdrop.querySelector("[data-summary-cancel]").addEventListener("click", closeSummaryPeriodPicker);
+      backdrop.addEventListener("click", (event) => {
+        if (event.target === backdrop) closeSummaryPeriodPicker();
+      });
+      backdrop.querySelector("#summaryPeriodForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        downloadSummaryFile(mode, input.value);
+        closeSummaryPeriodPicker();
+      });
+    }
+
+    function closeSummaryPeriodPicker() {
+      document.querySelectorAll(".summary-modal-backdrop").forEach((modal) => modal.remove());
+    }
+
+    function downloadSummaryFile(mode, selectedPeriod) {
       const records = state.printedEstimates || [];
       const headers = [
         "Period",
+        "Item Name",
         "Number of Estimates",
+        "Item Weight",
         "New Item Total",
         "Total Old Gold Weight",
         "Total Old Gold Value",
@@ -2019,10 +2139,12 @@
         "UPI Paid",
         "Total Amount Paid"
       ];
-      const summaryRows = appendTotalSummaryRow(buildSummaryRows(records, mode));
+      const summaryRows = appendTotalSummaryRow(buildSummaryRows(records, mode, selectedPeriod));
       const tableRows = summaryRows.map((summary) => [
         summary.period,
+        summary.itemName,
         toNumber(summary.count),
+        toNumber(summary.itemWeight),
         toNumber(summary.newItemTotal),
         toNumber(summary.totalOldGoldWeight),
         toNumber(summary.totalOldGoldValue),
@@ -2036,7 +2158,7 @@
       const blob = new Blob([workbook], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = summaryDownloadFilename(mode);
+      link.download = summaryDownloadFilename(mode, selectedPeriod);
       link.click();
       URL.revokeObjectURL(link.href);
     }
@@ -2044,6 +2166,7 @@
     function appendTotalSummaryRow(summaryRows) {
       const total = summaryRows.reduce((runningTotal, row) => {
         runningTotal.count += toNumber(row.count);
+        runningTotal.itemWeight += toNumber(row.itemWeight);
         runningTotal.newItemTotal += toNumber(row.newItemTotal);
         runningTotal.totalOldGoldWeight += toNumber(row.totalOldGoldWeight);
         runningTotal.totalOldGoldValue += toNumber(row.totalOldGoldValue);
@@ -2055,7 +2178,9 @@
         return runningTotal;
       }, {
         period: "TOTAL",
+        itemName: "",
         count: 0,
+        itemWeight: 0,
         newItemTotal: 0,
         totalOldGoldWeight: 0,
         totalOldGoldValue: 0,
@@ -2129,38 +2254,53 @@
       return name;
     }
 
-    function buildSummaryRows(records, mode) {
-      const groups = new Map();
+    function buildSummaryRows(records, mode, selectedPeriod) {
+      return records
+        .filter((record) => recordMatchesSummaryPeriod(record, mode, selectedPeriod))
+        .flatMap((record) => summaryRowsForRecord(record, mode));
+    }
 
-      records.forEach((record) => {
-        const period = summaryPeriod(record, mode);
-        if (!groups.has(period)) {
-          groups.set(period, {
-            period,
-            count: 0,
-            newItemTotal: 0,
-            totalOldGoldWeight: 0,
-            totalOldGoldValue: 0,
-            netPayable: 0,
-            cashPaid: 0,
-            cardPaid: 0,
-            upiPaid: 0,
-            totalPaid: 0
-          });
-        }
-        const summary = groups.get(period);
-        summary.count += 1;
-        summary.newItemTotal += toNumber(record.newItemTotal);
-        summary.totalOldGoldWeight += toNumber(record.totalOldGoldWeight);
-        summary.totalOldGoldValue += toNumber(record.totalOldGoldValue);
-        summary.netPayable += toNumber(record.netPayable);
-        summary.cashPaid += toNumber(record.cashPaid);
-        summary.cardPaid += toNumber(record.cardPaid);
-        summary.upiPaid += toNumber(record.upiPaid);
-        summary.totalPaid += toNumber(record.totalPaid);
+    function recordMatchesSummaryPeriod(record, mode, selectedPeriod) {
+      const dateIso = record.dateIso || isoFromDisplayDate(record.date);
+      if (!dateIso || !selectedPeriod) return false;
+      return mode === "month" ? dateIso.slice(0, 7) === selectedPeriod : dateIso === selectedPeriod;
+    }
+
+    function summaryRowsForRecord(record, mode) {
+      const period = summaryPeriod(record, mode);
+      const items = summaryItemsFromRecord(record);
+      return items.map((item, index) => {
+        const isFirstItem = index === 0;
+        return {
+          period,
+          itemName: item.name,
+          count: isFirstItem ? 1 : 0,
+          itemWeight: item.weight,
+          newItemTotal: item.amount,
+          totalOldGoldWeight: isFirstItem ? toNumber(record.totalOldGoldWeight) : 0,
+          totalOldGoldValue: isFirstItem ? toNumber(record.totalOldGoldValue) : 0,
+          netPayable: isFirstItem ? toNumber(record.netPayable) : 0,
+          cashPaid: isFirstItem ? toNumber(record.cashPaid) : 0,
+          cardPaid: isFirstItem ? toNumber(record.cardPaid) : 0,
+          upiPaid: isFirstItem ? toNumber(record.upiPaid) : 0,
+          totalPaid: isFirstItem ? toNumber(record.totalPaid) : 0
+        };
       });
+    }
 
-      return Array.from(groups.values()).sort((a, b) => a.period.localeCompare(b.period));
+    function summaryItemsFromRecord(record) {
+      if (Array.isArray(record.items) && record.items.length) {
+        return record.items.map((item) => ({
+          name: cleanText(item.name) || "Gold jewellery",
+          weight: toNumber(item.weight),
+          amount: toNumber(item.finalAmount)
+        }));
+      }
+      return [{
+        name: cleanText(record.itemNames) || "Gold jewellery",
+        weight: toNumber(record.totalNewWeight),
+        amount: toNumber(record.newItemTotal)
+      }];
     }
 
     function summaryPeriod(record, mode) {
@@ -2173,6 +2313,29 @@
       const nextSerial = nextSerialFromSavedEstimates();
       state = createBlankEstimateState(nextSerial, state.printedEstimates);
       persistAndRender();
+    }
+
+    function applyPrintPaperSize() {
+      clearPrintPaperSize();
+      const isA5 = printableRowCount() <= 4;
+      const size = isA5 ? "A5" : "A4";
+      const margin = isA5 ? "8mm" : "12mm";
+      document.body.classList.add(isA5 ? "print-a5" : "print-a4");
+      const style = document.createElement("style");
+      style.id = "printPageSizeStyle";
+      style.textContent = `@page { size: ${size}; margin: ${margin}; }`;
+      document.head.appendChild(style);
+    }
+
+    function clearPrintPaperSize() {
+      document.body.classList.remove("print-a5", "print-a4");
+      document.getElementById("printPageSizeStyle")?.remove();
+    }
+
+    function printableRowCount() {
+      const itemRows = state.items.filter((item) => hasItemContent(item)).length;
+      const oldGoldRows = state.oldGoldItems.filter((item) => hasOldGoldContent(item)).length;
+      return itemRows + oldGoldRows;
     }
 
     function calculateItem(item) {
@@ -2278,20 +2441,20 @@
       })}`;
     }
 
-    function summaryDownloadFilename(mode) {
-      return mode === "month" ? `${formatDownloadMonthLabel()} Summary.xlsx` : `${formatDownloadDateLabel()} Summary.xlsx`;
+    function summaryDownloadFilename(mode, selectedPeriod) {
+      return mode === "month" ? `${formatDownloadMonthLabel(selectedPeriod)} Summary.xlsx` : `${formatDownloadDateLabel(selectedPeriod)} Summary.xlsx`;
     }
 
-    function formatDownloadDateLabel() {
-      const date = new Date(`${todayIso()}T00:00:00`);
+    function formatDownloadDateLabel(dateIso) {
+      const date = new Date(`${dateIso || todayIso()}T00:00:00`);
       return date.toLocaleDateString("en-IN", {
         day: "numeric",
         month: "long"
       });
     }
 
-    function formatDownloadMonthLabel() {
-      const date = new Date(`${todayIso()}T00:00:00`);
+    function formatDownloadMonthLabel(monthIso) {
+      const date = new Date(`${monthIso || todayIso().slice(0, 7)}-01T00:00:00`);
       return date.toLocaleDateString("en-IN", {
         month: "long"
       });
