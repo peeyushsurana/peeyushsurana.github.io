@@ -51,56 +51,6 @@
       cursor: pointer;
     }
 
-    body:not(.access-granted) .app {
-      display: none;
-    }
-
-    .access-gate {
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-      background: #f4f7fb;
-    }
-
-    body.access-granted .access-gate {
-      display: none;
-    }
-
-    .access-panel {
-      width: min(420px, 100%);
-      padding: 28px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #ffffff;
-      box-shadow: var(--shadow);
-    }
-
-    .access-title {
-      margin: 0 0 8px;
-      font-size: 24px;
-      font-weight: 850;
-    }
-
-    .access-copy {
-      margin: 0 0 18px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .access-error {
-      min-height: 22px;
-      margin: 10px 0 0;
-      color: var(--red);
-      font-size: 13px;
-      font-weight: 800;
-    }
-
-    .access-panel .btn {
-      width: 100%;
-      margin-top: 12px;
-    }
-
     .app {
       min-height: 100vh;
       display: flex;
@@ -814,27 +764,10 @@
       tr {
         break-inside: avoid;
       }
-
-      .access-gate {
-        display: none !important;
-      }
     }
   </style>
 </head>
 <body>
-  <section class="access-gate" aria-label="Access code">
-    <form class="access-panel" id="accessForm">
-      <h1 class="access-title">Surana Jewellers</h1>
-      <p class="access-copy">Enter the access code to open the estimate app.</p>
-      <div class="field">
-        <label for="accessCode">Access code</label>
-        <input id="accessCode" type="password" autocomplete="current-password" required>
-      </div>
-      <button class="btn btn-primary" type="submit">Open app</button>
-      <div class="access-error" id="accessError" role="alert"></div>
-    </form>
-  </section>
-
   <div class="app">
     <header class="topbar">
       <div class="brand">
@@ -1138,8 +1071,6 @@
   </datalist>
 
   <script>
-    const ACCESS_CODE_HASH = "__ACCESS_CODE_HASH__";
-    const accessSessionKey = "surana-estimate-access-ok-v1";
     const storageKey = "gold-jewellery-estimate-v1";
     const NUMBER_RESET_VERSION = "fresh-start-001-v3";
     const ESTIMATE_PREFIX = "EST-2026/27";
@@ -1198,117 +1129,65 @@
     let editingEstimateIndex = null;
     let editingEstimateNo = "";
 
-    initializeAccessGate();
+    bindStaticFields();
+    bindPaymentFields();
+    render();
 
-    function startApp() {
-      bindStaticFields();
-      bindPaymentFields();
+    addItemBtn.addEventListener("click", () => {
+      state.items.push(createEmptyItem());
+      persistAndRender();
+      const lastInput = itemsBody.querySelector("tr:last-child input");
+      if (lastInput) lastInput.focus();
+    });
+
+    addOldGoldBtn.addEventListener("click", () => {
+      state.oldGoldItems.push(createEmptyOldGoldItem());
+      persistAndRender();
+      const lastInput = oldGoldBody.querySelector("tr:last-child input");
+      if (lastInput) lastInput.focus();
+    });
+
+    printBtn.addEventListener("click", () => {
+      syncEstimateNumber();
+      state.estimateDate = todayIso();
+      savePrintedEstimate();
       render();
+      shouldAdvanceAfterPrint = true;
+      window.print();
+    });
 
-      addItemBtn.addEventListener("click", () => {
-        state.items.push(createEmptyItem());
-        persistAndRender();
-        const lastInput = itemsBody.querySelector("tr:last-child input");
-        if (lastInput) lastInput.focus();
-      });
+    downloadDaySummaryBtn.addEventListener("click", () => {
+      downloadSummaryFile("day");
+    });
 
-      addOldGoldBtn.addEventListener("click", () => {
-        state.oldGoldItems.push(createEmptyOldGoldItem());
-        persistAndRender();
-        const lastInput = oldGoldBody.querySelector("tr:last-child input");
-        if (lastInput) lastInput.focus();
-      });
+    downloadMonthSummaryBtn.addEventListener("click", () => {
+      downloadSummaryFile("month");
+    });
 
-      printBtn.addEventListener("click", () => {
-        syncEstimateNumber();
-        state.estimateDate = todayIso();
-        savePrintedEstimate();
-        render();
-        shouldAdvanceAfterPrint = true;
-        window.print();
-      });
-
-      downloadDaySummaryBtn.addEventListener("click", () => {
-        downloadSummaryFile("day");
-      });
-
-      downloadMonthSummaryBtn.addEventListener("click", () => {
-        downloadSummaryFile("month");
-      });
-
-      document.addEventListener("click", (event) => {
-        if (!event.target.closest(".estimate-action-popover") && !event.target.closest("[data-estimate-actions]")) {
-          closeEstimateActions();
-        }
-      });
-
-      window.addEventListener("afterprint", () => {
-        if (restoreStateAfterReprint) {
-          state = restoreStateAfterReprint;
-          restoreStateAfterReprint = null;
-          persistAndRender();
-          return;
-        }
-        if (!shouldAdvanceAfterPrint) return;
-        shouldAdvanceAfterPrint = false;
-        openNextBlankEstimate();
-      });
-
-      newEstimateBtn.addEventListener("click", () => {
-        editingEstimateIndex = null;
-        editingEstimateNo = "";
-        state = createBlankEstimateState(state.estimateSerial, state.printedEstimates);
-        persistAndRender();
-      });
-    }
-
-    function initializeAccessGate() {
-      const accessForm = document.getElementById("accessForm");
-      const accessCode = document.getElementById("accessCode");
-      const accessError = document.getElementById("accessError");
-      let appStarted = false;
-
-      function unlockApp() {
-        if (appStarted) return;
-        appStarted = true;
-        document.body.classList.add("access-granted");
-        sessionStorage.setItem(accessSessionKey, "true");
-        startApp();
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".estimate-action-popover") && !event.target.closest("[data-estimate-actions]")) {
+        closeEstimateActions();
       }
+    });
 
-      if (ACCESS_CODE_HASH === "__ACCESS_CODE_HASH__") {
-        accessError.textContent = "Access code is not configured. Deploy with GitHub Actions after adding the SECRET repository secret.";
-        accessCode.disabled = true;
-        accessForm.querySelector("button").disabled = true;
+    window.addEventListener("afterprint", () => {
+      if (restoreStateAfterReprint) {
+        state = restoreStateAfterReprint;
+        restoreStateAfterReprint = null;
+        persistAndRender();
         return;
       }
+      if (!shouldAdvanceAfterPrint) return;
+      shouldAdvanceAfterPrint = false;
+      openNextBlankEstimate();
+    });
 
-      if (sessionStorage.getItem(accessSessionKey) === "true") {
-        unlockApp();
-        return;
-      }
-
-      accessForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const enteredHash = await sha256Hex(accessCode.value.trim());
-        if (enteredHash === ACCESS_CODE_HASH) {
-          accessError.textContent = "";
-          unlockApp();
-          return;
-        }
-        accessError.textContent = "Incorrect access code.";
-        accessCode.value = "";
-        accessCode.focus();
-      });
-    }
-
-    async function sha256Hex(value) {
-      const bytes = new TextEncoder().encode(value);
-      const digest = await crypto.subtle.digest("SHA-256", bytes);
-      return Array.from(new Uint8Array(digest))
-        .map((byte) => byte.toString(16).padStart(2, "0"))
-        .join("");
-    }
+    newEstimateBtn.addEventListener("click", () => {
+      editingEstimateIndex = null;
+      editingEstimateNo = "";
+      state = createBlankEstimateState(state.estimateSerial, state.printedEstimates);
+      persistAndRender();
+    });
 
     function bindStaticFields() {
       Object.entries(fields).forEach(([key, input]) => {

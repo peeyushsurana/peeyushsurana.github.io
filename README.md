@@ -8,12 +8,13 @@ Live site after GitHub Pages deployment:
 https://peeyushsurana.github.io
 ```
 
-The app runs fully in the browser. It does not need a server, database, or `.env` secrets right now.
+The app runs fully in the browser. It uses a simple access-code screen generated from a GitHub repository secret named `SECRET` during deployment.
 
 ## Files In This Repository
 
 - `index.html` - the estimate app opened by GitHub Pages.
 - `surana-header-black.png` - the header logo used inside the estimate.
+- `.github/workflows/deploy-pages.yml` - deploys the site and adds the access-code hash.
 - `.gitignore` - keeps local/private files out of Git.
 
 ## Install Git On Mac
@@ -70,7 +71,7 @@ From the folder containing this `README.md`, run:
 ```bash
 git init
 git branch -M main
-git add index.html surana-header-black.png README.md .gitignore
+git add index.html surana-header-black.png README.md .gitignore .github/workflows/deploy-pages.yml
 git commit -m "Deploy Surana Jewellers estimate app"
 git remote add origin https://github.com/peeyushsurana/peeyushsurana.github.io.git
 git push -u origin main
@@ -78,9 +79,33 @@ git push -u origin main
 
 If Git asks you to sign in, follow the prompt. GitHub may ask for browser login or a Personal Access Token instead of a password.
 
+For a fine-grained Personal Access Token, choose the repository `peeyushsurana.github.io` and give:
+
+- `Contents` - Read and write
+- `Metadata` - Read-only / required
+
 ## Deploy With GitHub Pages
 
-For a repository named `peeyushsurana.github.io`, GitHub Pages normally deploys automatically from the `main` branch.
+For this app, GitHub Pages should deploy using GitHub Actions because the workflow reads the repository secret named `SECRET` and creates the access-code check.
+
+Before the first deployment:
+
+1. Open the GitHub repository.
+2. Go to `Settings`.
+3. Go to `Secrets and variables` -> `Actions`.
+4. Click `New repository secret`.
+5. Name: `SECRET`.
+6. Value: your private access code.
+7. Click `Add secret`.
+
+Then configure Pages:
+
+1. Open the GitHub repository.
+2. Go to `Settings`.
+3. Click `Pages`.
+4. Under `Build and deployment`, choose:
+   - Source: `GitHub Actions`
+5. Save if GitHub shows a save button.
 
 After pushing, wait a minute and open:
 
@@ -88,20 +113,17 @@ After pushing, wait a minute and open:
 https://peeyushsurana.github.io
 ```
 
-If it does not appear:
+If it does not appear, open the repository and click `Actions`. The latest workflow run should show whether deployment succeeded or failed.
 
-1. Open the GitHub repository.
-2. Go to `Settings`.
-3. Click `Pages`.
-4. Under `Build and deployment`, choose:
-   - Source: `Deploy from a branch`
-   - Branch: `main`
-   - Folder: `/ (root)`
-5. Save and wait for GitHub to deploy.
+## Access Code And Security
+
+The access code is the value stored in the GitHub repository secret named `SECRET`.
+
+Important: this is a simple access gate for a static website. It keeps the plain access code out of the repository, but it is not the same as server-side login. A determined technical person may still bypass client-side checks on a public static site.
+
+For stronger protection, use a service with real authentication, such as Cloudflare Access, Netlify password protection, Vercel authentication, or a private internal app.
 
 ## About `.env` Secrets
-
-This app does not need `.env` secrets right now.
 
 If you add private keys, passwords, API tokens, or other secrets later:
 
@@ -115,7 +137,7 @@ If you add private keys, passwords, API tokens, or other secrets later:
 After changing files, push updates with:
 
 ```bash
-git add index.html surana-header-black.png README.md .gitignore
+git add index.html surana-header-black.png README.md .gitignore .github/workflows/deploy-pages.yml
 git commit -m "Update estimate app"
 git push
 ```

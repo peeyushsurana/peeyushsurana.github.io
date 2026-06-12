@@ -1,0 +1,59 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Add access-code hash
+        env:
+          ACCESS_CODE: ${{ secrets.SECRET }}
+        run: |
+          if [ -z "$ACCESS_CODE" ]; then
+            echo "Repository secret named SECRET is missing." >&2
+            exit 1
+          fi
+          node <<'NODE'
+          const crypto = require("crypto");
+          const fs = require("fs");
+          const secret = process.env.ACCESS_CODE || "";
+          const hash = crypto.createHash("sha256").update(secret.trim()).digest("hex");
+          const file = "index.html";
+          const html = fs.readFileSync(file, "utf8");
+          if (!html.includes("__ACCESS_CODE_HASH__")) {
+            throw new Error("Access-code placeholder was not found in index.html");
+          }
+          fs.writeFileSync(file, html.replaceAll("__ACCESS_CODE_HASH__", hash));
+          NODE
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
