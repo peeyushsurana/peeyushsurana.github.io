@@ -1262,11 +1262,12 @@
       });
     }
 
-    function initializeAccessGate() {
+    async function initializeAccessGate() {
       const accessForm = document.getElementById("accessForm");
       const accessCode = document.getElementById("accessCode");
       const accessError = document.getElementById("accessError");
       let appStarted = false;
+      const activeAccessCodeHash = await resolveAccessCodeHash();
 
       function unlockApp() {
         if (appStarted) return;
@@ -1276,22 +1277,24 @@
         startApp();
       }
 
-      if (ACCESS_CODE_HASH === "__ACCESS_CODE_HASH__") {
-        accessError.textContent = "Access code is not configured. Deploy with GitHub Actions after adding the SECRET repository secret.";
-        accessCode.disabled = true;
-        accessForm.querySelector("button").disabled = true;
-        return;
+      if (!activeAccessCodeHash) {
+        accessError.textContent = "Access code is not configured. If testing locally, open this folder with a local server so the browser can read .env.";
       }
 
-      if (sessionStorage.getItem(accessSessionKey) === "true") {
+      if (activeAccessCodeHash && sessionStorage.getItem(accessSessionKey) === "true") {
         unlockApp();
         return;
       }
 
       accessForm.addEventListener("submit", async (event) => {
         event.preventDefault();
+        if (!activeAccessCodeHash) {
+          accessError.textContent = "Could not read .env from this browser view. In Terminal run: python3 -m http.server 8000, then open http://localhost:8000";
+          accessCode.focus();
+          return;
+        }
         const enteredHash = await sha256Hex(accessCode.value.trim());
-        if (enteredHash === ACCESS_CODE_HASH) {
+        if (enteredHash === activeAccessCodeHash) {
           accessError.textContent = "";
           unlockApp();
           return;
@@ -1300,6 +1303,39 @@
         accessCode.value = "";
         accessCode.focus();
       });
+    }
+
+    async function resolveAccessCodeHash() {
+      if (ACCESS_CODE_HASH !== "__ACCESS_CODE_HASH__") {
+        return ACCESS_CODE_HASH;
+      }
+      const envText = await readLocalEnv();
+      const secret = parseEnvSecret(envText);
+      return secret ? sha256Hex(secret.trim()) : "";
+    }
+
+    async function readLocalEnv() {
+      try {
+        const response = await fetch(".env", { cache: "no-store" });
+        if (response.ok) return response.text();
+      } catch {}
+      return new Promise((resolve) => {
+        try {
+          const request = new XMLHttpRequest();
+          request.open("GET", ".env", true);
+          request.onload = () => resolve(request.status === 0 || request.status === 200 ? request.responseText : "");
+          request.onerror = () => resolve("");
+          request.send();
+        } catch {
+          resolve("");
+        }
+      });
+    }
+
+    function parseEnvSecret(envText) {
+      const match = String(envText || "").match(/^SECRET=(.*)$/m);
+      if (!match) return "";
+      return match[1].trim().replace(/^['"]|['"]$/g, "");
     }
 
     async function sha256Hex(value) {

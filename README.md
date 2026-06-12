@@ -123,6 +123,32 @@ Important: this is a simple access gate for a static website. It keeps the plain
 
 For stronger protection, use a service with real authentication, such as Cloudflare Access, Netlify password protection, Vercel authentication, or a private internal app.
 
+## Test Locally With `.env`
+
+For local testing, `index.html` tries to read `.env` from the same folder.
+
+Create `.env`:
+
+```env
+SECRET=password
+```
+
+Open `index.html` in your browser and enter the value from `.env`.
+
+If the browser blocks reading `.env`, run a small local server from the project folder:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open:
+
+```text
+http://localhost:8000
+```
+
+Do not commit `.env`; it is ignored by `.gitignore`.
+
 ## About `.env` Secrets
 
 If you add private keys, passwords, API tokens, or other secrets later:
