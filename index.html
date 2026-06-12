@@ -1306,7 +1306,10 @@
     }
 
     async function resolveAccessCodeHash() {
-      if (ACCESS_CODE_HASH !== "__ACCESS_CODE_HASH__") {
+      // Built from parts so the deploy workflow's sed replacement
+      // only touches the ACCESS_CODE_HASH assignment, not this check.
+      const placeholder = ["__ACCESS_CODE_", "HASH__"].join("");
+      if (ACCESS_CODE_HASH !== placeholder) {
         return ACCESS_CODE_HASH;
       }
       const envText = await readLocalEnv();
