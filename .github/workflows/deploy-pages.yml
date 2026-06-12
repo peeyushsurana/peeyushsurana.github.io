@@ -36,18 +36,13 @@ jobs:
             echo "Repository secret named SECRET is missing." >&2
             exit 1
           fi
-          node <<'NODE'
-          const crypto = require("crypto");
-          const fs = require("fs");
-          const secret = process.env.ACCESS_CODE || "";
-          const hash = crypto.createHash("sha256").update(secret.trim()).digest("hex");
-          const file = "index.html";
-          const html = fs.readFileSync(file, "utf8");
-          if (!html.includes("__ACCESS_CODE_HASH__")) {
-            throw new Error("Access-code placeholder was not found in index.html");
-          }
-          fs.writeFileSync(file, html.replaceAll("__ACCESS_CODE_HASH__", hash));
-          NODE
+          
+          # Generate the SHA-256 hash cleanly using native Unix utilities
+          HASH=$(echo -n "$ACCESS_CODE" | tr -d '\r\n' | openssl dgst -sha256 | awk '{print $2}')
+          echo "Hash generated successfully."
+          
+          # Replace the placeholder in index.html seamlessly using sed
+          sed -i "s/__ACCESS_CODE_HASH__/$HASH/g" index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
