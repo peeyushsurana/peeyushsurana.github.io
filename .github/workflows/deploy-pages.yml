@@ -28,7 +28,7 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Add access-code hash
+      - name: Inject access code
         env:
           ACCESS_CODE: ${{ secrets.SECRET }}
         run: |
@@ -36,13 +36,25 @@ jobs:
             echo "Repository secret named SECRET is missing." >&2
             exit 1
           fi
-          
-          # Generate the SHA-256 hash cleanly using native Unix utilities
-          HASH=$(echo -n "$ACCESS_CODE" | tr -d '\r\n' | openssl dgst -sha256 | awk '{print $2}')
-          echo "Hash generated successfully."
-          
-          # Replace the placeholder in index.html seamlessly using sed
-          sed -i "/const ACCESS_CODE_HASH/s/__ACCESS_CODE_HASH__/$HASH/" index.html
+
+          # Strip any stray carriage returns/newlines from the secret value
+          CODE=$(printf '%s' "$ACCESS_CODE" | tr -d '\r\n')
+
+          # Replace the placeholder on the ACCESS_CODE assignment line only.
+          # Use a non-/ sed delimiter so codes containing "/" still work,
+          # and export CODE so the python helper can read it safely.
+          export CODE
+          python3 - <<'PY'
+          import os, re
+          code = os.environ["CODE"]
+          with open("index.html", "r", encoding="utf-8") as f:
+              html = f.read()
+          html = html.replace('const ACCESS_CODE = "__ACCESS_CODE__"',
+                              'const ACCESS_CODE = ' + ('"' + code.replace('\\', '\\\\').replace('"', '\\"') + '"'))
+          with open("index.html", "w", encoding="utf-8") as f:
+              f.write(html)
+          print("Access code injected.")
+          PY
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

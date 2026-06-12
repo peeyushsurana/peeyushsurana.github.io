@@ -60,7 +60,10 @@
       display: grid;
       place-items: center;
       padding: 24px;
-      background: #f4f7fb;
+      background:
+        radial-gradient(900px 500px at 50% -10%, rgba(184, 135, 45, 0.14), transparent 60%),
+        radial-gradient(700px 420px at 85% 110%, rgba(184, 135, 45, 0.10), transparent 65%),
+        linear-gradient(180deg, #fbf8f2 0%, #f3ede1 100%);
     }
 
     body.access-granted .access-gate {
@@ -68,37 +71,146 @@
     }
 
     .access-panel {
-      width: min(420px, 100%);
-      padding: 28px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
+      width: min(440px, 100%);
+      padding: 44px 40px 36px;
+      border: 1px solid rgba(184, 135, 45, 0.22);
+      border-radius: 18px;
       background: #ffffff;
-      box-shadow: var(--shadow);
+      box-shadow:
+        0 24px 60px rgba(60, 42, 8, 0.16),
+        0 2px 8px rgba(60, 42, 8, 0.06);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
     }
 
-    .access-title {
-      margin: 0 0 8px;
-      font-size: 24px;
-      font-weight: 850;
+    .access-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 5px;
+      background: linear-gradient(90deg, #7b5516, #d8ab52 35%, #f1d693 50%, #d8ab52 65%, #7b5516);
+    }
+
+    .access-logo {
+      width: min(260px, 80%);
+      height: auto;
+      display: block;
+      margin: 6px auto 18px;
+    }
+
+    .access-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 18px;
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+    }
+
+    .access-divider::before,
+    .access-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(184, 135, 45, 0.45));
+    }
+
+    .access-divider::after {
+      background: linear-gradient(90deg, rgba(184, 135, 45, 0.45), transparent);
     }
 
     .access-copy {
-      margin: 0 0 18px;
+      margin: 0 0 22px;
       color: var(--muted);
-      line-height: 1.5;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .access-field {
+      text-align: left;
+    }
+
+    .access-field label {
+      color: #4b5263;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .access-field input {
+      text-align: center;
+      font-size: 18px;
+      letter-spacing: 0.25em;
+      border-color: rgba(184, 135, 45, 0.35);
+    }
+
+    .access-field input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(184, 135, 45, 0.18);
+    }
+
+    .access-btn {
+      width: 100%;
+      min-height: 50px;
+      margin-top: 16px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #c9963a, #a87a24);
+      color: #fffaf0;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.06em;
+      border: 1px solid #8d6519;
+      box-shadow: 0 10px 22px rgba(140, 100, 25, 0.28);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+    }
+
+    .access-btn:hover {
+      filter: brightness(1.06);
+      box-shadow: 0 12px 26px rgba(140, 100, 25, 0.34);
+    }
+
+    .access-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 6px 14px rgba(140, 100, 25, 0.26);
     }
 
     .access-error {
       min-height: 22px;
-      margin: 10px 0 0;
+      margin: 14px 0 0;
       color: var(--red);
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 700;
     }
 
-    .access-panel .btn {
-      width: 100%;
-      margin-top: 12px;
+    .access-panel.access-shake {
+      animation: access-shake 0.4s ease;
+    }
+
+    @keyframes access-shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+
+    .access-foot {
+      margin: 22px 0 0;
+      color: #9aa1ae;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 480px) {
+      .access-panel {
+        padding: 34px 24px 28px;
+      }
     }
 
     .app {
@@ -824,14 +936,16 @@
 <body>
   <section class="access-gate" aria-label="Access code">
     <form class="access-panel" id="accessForm">
-      <h1 class="access-title">Surana Jewellers</h1>
-      <p class="access-copy">Enter the access code to open the estimate app.</p>
-      <div class="field">
+      <img class="access-logo" src="outputs/surana-header-black.png" alt="Surana Jewellers">
+      <div class="access-divider" aria-hidden="true">Private Access</div>
+      <p class="access-copy">This estimate app is reserved for authorised staff.<br>Enter your access code to continue.</p>
+      <div class="access-field">
         <label for="accessCode">Access code</label>
-        <input id="accessCode" type="password" autocomplete="current-password" required>
+        <input id="accessCode" type="password" autocomplete="current-password" placeholder="••••••••" required>
       </div>
-      <button class="btn btn-primary" type="submit">Open app</button>
+      <button class="access-btn" type="submit">Unlock</button>
       <div class="access-error" id="accessError" role="alert"></div>
+      <p class="access-foot">Surana Jewellers &middot; Estimate Suite</p>
     </form>
   </section>
 
@@ -1138,7 +1252,7 @@
   </datalist>
 
   <script>
-    const ACCESS_CODE_HASH = "__ACCESS_CODE_HASH__";
+    const ACCESS_CODE = "__ACCESS_CODE__";
     const accessSessionKey = "surana-estimate-access-ok-v1";
     const storageKey = "gold-jewellery-estimate-v1";
     const NUMBER_RESET_VERSION = "fresh-start-001-v3";
@@ -1267,7 +1381,7 @@
       const accessCode = document.getElementById("accessCode");
       const accessError = document.getElementById("accessError");
       let appStarted = false;
-      const activeAccessCodeHash = await resolveAccessCodeHash();
+      const activeAccessCode = await resolveAccessCode();
 
       function unlockApp() {
         if (appStarted) return;
@@ -1277,24 +1391,23 @@
         startApp();
       }
 
-      if (!activeAccessCodeHash) {
+      if (!activeAccessCode) {
         accessError.textContent = "Access code is not configured. If testing locally, open this folder with a local server so the browser can read .env.";
       }
 
-      if (activeAccessCodeHash && sessionStorage.getItem(accessSessionKey) === "true") {
+      if (activeAccessCode && sessionStorage.getItem(accessSessionKey) === "true") {
         unlockApp();
         return;
       }
 
-      accessForm.addEventListener("submit", async (event) => {
+      accessForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        if (!activeAccessCodeHash) {
+        if (!activeAccessCode) {
           accessError.textContent = "Could not read .env from this browser view. In Terminal run: python3 -m http.server 8000, then open http://localhost:8000";
           accessCode.focus();
           return;
         }
-        const enteredHash = await sha256Hex(accessCode.value.trim());
-        if (enteredHash === activeAccessCodeHash) {
+        if (accessCode.value.trim() === activeAccessCode) {
           accessError.textContent = "";
           unlockApp();
           return;
@@ -1302,19 +1415,22 @@
         accessError.textContent = "Incorrect access code.";
         accessCode.value = "";
         accessCode.focus();
+        const panel = accessForm.closest(".access-panel") || accessForm;
+        panel.classList.remove("access-shake");
+        void panel.offsetWidth;
+        panel.classList.add("access-shake");
       });
     }
 
-    async function resolveAccessCodeHash() {
+    async function resolveAccessCode() {
       // Built from parts so the deploy workflow's sed replacement
-      // only touches the ACCESS_CODE_HASH assignment, not this check.
-      const placeholder = ["__ACCESS_CODE_", "HASH__"].join("");
-      if (ACCESS_CODE_HASH !== placeholder) {
-        return ACCESS_CODE_HASH;
+      // only touches the ACCESS_CODE assignment, not this check.
+      const placeholder = ["__ACCESS", "_CODE__"].join("");
+      if (ACCESS_CODE !== placeholder) {
+        return ACCESS_CODE.trim();
       }
       const envText = await readLocalEnv();
-      const secret = parseEnvSecret(envText);
-      return secret ? sha256Hex(secret.trim()) : "";
+      return parseEnvSecret(envText);
     }
 
     async function readLocalEnv() {
@@ -1339,14 +1455,6 @@
       const match = String(envText || "").match(/^SECRET=(.*)$/m);
       if (!match) return "";
       return match[1].trim().replace(/^['"]|['"]$/g, "");
-    }
-
-    async function sha256Hex(value) {
-      const bytes = new TextEncoder().encode(value);
-      const digest = await crypto.subtle.digest("SHA-256", bytes);
-      return Array.from(new Uint8Array(digest))
-        .map((byte) => byte.toString(16).padStart(2, "0"))
-        .join("");
     }
 
     function bindStaticFields() {
