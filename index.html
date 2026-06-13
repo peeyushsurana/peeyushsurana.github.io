@@ -357,6 +357,31 @@
       border-bottom: 0;
     }
 
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .mode-tab {
+      min-height: 54px;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .mode-tab.is-active {
+      background: var(--green);
+      color: #ffffff;
+      box-shadow: 0 8px 18px rgba(8, 117, 95, 0.18);
+    }
+
     .section-header {
       display: flex;
       align-items: center;
@@ -488,6 +513,24 @@
     }
 
     .history-link:hover {
+      color: var(--gold-dark);
+    }
+
+    .type-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 58px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #eef3f8;
+      color: #334155;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .type-pill-chit {
+      background: #fff5df;
       color: var(--gold-dark);
     }
 
@@ -643,6 +686,10 @@
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
+    }
+
+    [hidden] {
+      display: none !important;
     }
 
     .history-empty {
@@ -1042,6 +1089,13 @@
     <main class="content">
       <div class="editor" aria-label="Estimate form">
         <section class="section">
+          <div class="mode-tabs" role="tablist" aria-label="Estimate type">
+            <button class="mode-tab" id="normalEstimateMode" type="button" role="tab" data-estimate-type="normal">Normal Estimate</button>
+            <button class="mode-tab" id="chitEstimateMode" type="button" role="tab" data-estimate-type="chit">Chit Estimate</button>
+          </div>
+        </section>
+
+        <section class="section">
           <div class="section-header">
             <h2 class="section-title">Customer</h2>
           </div>
@@ -1161,6 +1215,20 @@
               <input id="paymentUpi" inputmode="decimal" placeholder="Amount">
             </div>
           </div>
+          <div class="payment-grid" style="margin-top: 12px;" data-chit-only hidden>
+            <div class="field">
+              <label for="chitAmount">Chit Amount</label>
+              <input id="chitAmount" inputmode="decimal" placeholder="Amount">
+            </div>
+            <div class="field">
+              <label for="chitBonus">Chit Bonus</label>
+              <input id="chitBonus" inputmode="decimal" placeholder="Amount">
+            </div>
+            <div class="field">
+              <label for="chitWeight">Chit Weight</label>
+              <input id="chitWeight" inputmode="decimal" placeholder="Grams">
+            </div>
+          </div>
           <div class="summary-grid" style="margin-top: 12px;">
             <div class="metric metric-strong">
               <div class="metric-label">Total paid</div>
@@ -1186,6 +1254,7 @@
               <thead>
                 <tr>
                   <th>Estimate</th>
+                  <th>Type</th>
                   <th>Date</th>
                   <th>Customer</th>
                   <th>Items</th>
@@ -1287,9 +1356,25 @@
                     <td>New item total incl. GST</td>
                     <td id="summaryGrandTotal">Rs. 0.00</td>
                   </tr>
-                  <tr>
+                  <tr id="summaryOldGoldRow">
                     <td>Old gold deduction</td>
                     <td id="summaryOldGoldTotal">Rs. 0.00</td>
+                  </tr>
+                  <tr id="summaryChitAmountRow" data-chit-only hidden>
+                    <td>Chit amount deduction</td>
+                    <td id="summaryChitAmount">Rs. 0.00</td>
+                  </tr>
+                  <tr id="summaryChitBonusRow" data-chit-only hidden>
+                    <td>Chit bonus deduction</td>
+                    <td id="summaryChitBonus">Rs. 0.00</td>
+                  </tr>
+                  <tr id="summaryChitWeightRow" data-chit-only hidden>
+                    <td id="summaryChitWeightLabel">Chit weight deduction</td>
+                    <td id="summaryChitWeightValue">Rs. 0.00</td>
+                  </tr>
+                  <tr id="summaryChitWeightGstRow" data-chit-only hidden>
+                    <td>GST on chit weight @ 3%</td>
+                    <td id="summaryChitWeightGst">Rs. 0.00</td>
                   </tr>
                   <tr class="grand-row">
                     <td>Net payable</td>
@@ -1339,6 +1424,7 @@
       estimateSerial: 1,
       estimateNo: createEstimateNo(1),
       estimateDate: todayIso(),
+      estimateType: "normal",
       customerName: "",
       customerPhone: "",
       items: [
@@ -1348,6 +1434,7 @@
         { weight: "", purity: "", rate: "" }
       ],
       payments: { cash: "", card: "", upi: "" },
+      chit: { amount: "", bonus: "", weight: "" },
       printedEstimates: [],
       numberResetVersion: NUMBER_RESET_VERSION
     };
@@ -1371,10 +1458,17 @@
     const downloadMonthSummaryBtn = document.getElementById("downloadMonthSummaryBtn");
     const printBtn = document.getElementById("printBtn");
     const newEstimateBtn = document.getElementById("newEstimateBtn");
+    const estimateModeButtons = document.querySelectorAll("[data-estimate-type]");
+    const chitOnlyElements = document.querySelectorAll("[data-chit-only]");
     const paymentFields = {
       cash: document.getElementById("paymentCash"),
       card: document.getElementById("paymentCard"),
       upi: document.getElementById("paymentUpi")
+    };
+    const chitFields = {
+      amount: document.getElementById("chitAmount"),
+      bonus: document.getElementById("chitBonus"),
+      weight: document.getElementById("chitWeight")
     };
     let shouldAdvanceAfterPrint = false;
     let restoreStateAfterReprint = null;
@@ -1386,7 +1480,9 @@
     function startApp() {
       requestPersistentStorage();
       bindStaticFields();
+      bindEstimateModeFields();
       bindPaymentFields();
+      bindChitFields();
       render();
 
       addItemBtn.addEventListener("click", () => {
@@ -1406,6 +1502,7 @@
       printBtn.addEventListener("click", () => {
         syncEstimateNumber();
         state.estimateDate = todayIso();
+        if (!validateChitWeight()) return;
         savePrintedEstimate();
         render();
         applyPrintPaperSize();
@@ -1443,7 +1540,7 @@
       newEstimateBtn.addEventListener("click", () => {
         editingEstimateIndex = null;
         editingEstimateNo = "";
-        state = createBlankEstimateState(state.estimateSerial, state.printedEstimates);
+        state = createBlankEstimateState(state.estimateSerial, state.printedEstimates, state.estimateType);
         persistAndRender();
       });
     }
@@ -1548,11 +1645,33 @@
       });
     }
 
+    function bindEstimateModeFields() {
+      estimateModeButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          state.estimateType = button.dataset.estimateType === "chit" ? "chit" : "normal";
+          persistAndRender();
+        });
+      });
+    }
+
+    function bindChitFields() {
+      Object.entries(chitFields).forEach(([key, input]) => {
+        input.addEventListener("input", () => {
+          state.chit[key] = input.value;
+          persistAndRender();
+        });
+      });
+    }
+
     function render(shouldSave = true, syncDate = true) {
       if (syncDate) state.estimateDate = todayIso();
+      state.estimateType = normalizeEstimateType(state.estimateType);
+      state.chit = normalizeChit(state.chit);
+      renderEstimateMode();
       renderStaticFields();
       renderDateDisplay();
       renderPaymentFields();
+      renderChitFields();
       renderItems();
       renderOldGoldItems();
       renderPreview();
@@ -1576,12 +1695,31 @@
       });
     }
 
+    function renderEstimateMode() {
+      const isChit = isChitEstimate();
+      estimateModeButtons.forEach((button) => {
+        const active = button.dataset.estimateType === state.estimateType;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      chitOnlyElements.forEach((element) => {
+        element.hidden = !isChit;
+      });
+      document.body.classList.toggle("chit-mode", isChit);
+    }
+
+    function renderChitFields() {
+      Object.entries(chitFields).forEach(([key, input]) => {
+        if (input.value !== state.chit[key]) input.value = state.chit[key] || "";
+      });
+    }
+
     function renderItems() {
       itemsBody.innerHTML = "";
 
       state.items.forEach((item, index) => {
         const row = document.createElement("tr");
-        const calc = calculateItem(item);
+        const calc = calculateItem(item, index);
         row.innerHTML = `
           <td class="item-name-cell"><input aria-label="Item name" data-field="name" data-index="${index}" value="${escapeAttribute(item.name)}" placeholder="Ring"></td>
           <td class="number-cell"><input aria-label="Net weight" data-field="weight" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.weight)}" placeholder="Grams"></td>
@@ -1683,6 +1821,7 @@
       document.getElementById("previewShopAddress").textContent = businessDetails.shopAddress;
       document.getElementById("previewShopPhone").textContent = `Phone: ${businessDetails.shopPhone}`;
       document.getElementById("previewShopGstn").textContent = `GSTN: ${businessDetails.gstn}`;
+      document.querySelector(".estimate-label").textContent = isChitEstimate() ? "Chit Estimate Copy" : "Estimate Copy";
       document.getElementById("previewEstimateNo").textContent = cleanText(state.estimateNo) || "EST-0001";
       document.getElementById("previewEstimateDate").textContent = formatDate(state.estimateDate);
       document.getElementById("previewCustomer").textContent = customerParts.join("\n");
@@ -1698,7 +1837,8 @@
         previewItems.appendChild(row);
       } else {
         printableItems.forEach((item, index) => {
-          const calc = calculateItem(item);
+          const itemIndex = state.items.indexOf(item);
+          const calc = calculateItem(item, itemIndex);
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${index + 1}</td>
@@ -1716,10 +1856,11 @@
       const oldGoldPrintSection = document.getElementById("oldGoldPrintSection");
       const previewOldGold = document.getElementById("previewOldGold");
       previewOldGold.innerHTML = "";
-      oldGoldPrintSection.hidden = printableOldGoldItems.length === 0;
+      oldGoldPrintSection.hidden = totals.oldGoldTotal <= 0;
 
       printableOldGoldItems.forEach((item, index) => {
         const calc = calculateOldGoldItem(item);
+        if (calc.value <= 0) return;
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${index + 1}</td>
@@ -1744,8 +1885,28 @@
       document.getElementById("summarySgst").textContent = formatMoney(totals.sgst);
       document.getElementById("summaryGrandTotal").textContent = formatMoney(totals.grandTotal);
       document.getElementById("summaryOldGoldTotal").textContent = formatMoney(totals.oldGoldTotal);
+      document.getElementById("summaryChitAmount").textContent = formatMoney(totals.chitAmount);
+      document.getElementById("summaryChitBonus").textContent = formatMoney(totals.chitBonus);
+      document.getElementById("summaryChitWeightLabel").textContent = `Chit weight deduction (${formatWeight(totals.chitWeight)})`;
+      document.getElementById("summaryChitWeightValue").textContent = formatMoney(totals.chitWeightValue);
+      document.getElementById("summaryChitWeightGst").textContent = formatMoney(totals.chitWeightGst);
       document.getElementById("summaryNetPayable").textContent = formatMoney(totals.netPayable);
       document.getElementById("amountWords").textContent = numberToIndianWords(Math.round(totals.netPayable));
+      renderPrintableDeductionRows(totals);
+    }
+
+    function renderPrintableDeductionRows(totals) {
+      const isChit = isChitEstimate();
+      setRowHidden("summaryOldGoldRow", totals.oldGoldTotal <= 0);
+      setRowHidden("summaryChitAmountRow", !isChit || totals.chitAmount <= 0);
+      setRowHidden("summaryChitBonusRow", !isChit || totals.chitBonus <= 0);
+      setRowHidden("summaryChitWeightRow", !isChit || totals.chitWeightValue <= 0);
+      setRowHidden("summaryChitWeightGstRow", !isChit || totals.chitWeightGst <= 0);
+    }
+
+    function setRowHidden(id, hidden) {
+      const row = document.getElementById(id);
+      if (row) row.hidden = hidden;
     }
 
     function renderSavedEstimates() {
@@ -1757,6 +1918,7 @@
         const row = document.createElement("tr");
         row.innerHTML = `
           <td><button class="history-link" type="button" data-estimate-actions="${index}" title="Estimate actions">${escapeHtml(record.estimateNo)}</button></td>
+          <td><span class="type-pill ${estimateTypeClass(record.estimateType)}">${escapeHtml(formatEstimateType(record.estimateType))}</span></td>
           <td>${escapeHtml(record.date)}</td>
           <td>${escapeHtml(record.customerName || "Walk-in")}</td>
           <td>${escapeHtml(record.itemNames || "-")}</td>
@@ -1842,7 +2004,7 @@
       editingEstimateIndex = null;
       editingEstimateNo = "";
       renumberSavedEstimates();
-      state = createBlankEstimateState(nextSerialFromSavedEstimates(), state.printedEstimates);
+      state = createBlankEstimateState(nextSerialFromSavedEstimates(), state.printedEstimates, state.estimateType);
       persistAndRender();
     }
 
@@ -1884,11 +2046,13 @@
           estimateSerial,
           estimateNo: createEstimateNo(estimateSerial),
           estimateDate: todayIso(),
+          estimateType: shouldResetNumber ? "normal" : normalizeEstimateType(saved.estimateType),
           customerName: shouldResetNumber ? "" : saved.customerName || "",
           customerPhone: shouldResetNumber ? "" : saved.customerPhone || "",
           items: !shouldResetNumber && Array.isArray(saved.items) && saved.items.length ? saved.items.map(normalizeItem) : structuredClone(defaultState.items),
           oldGoldItems: !shouldResetNumber && Array.isArray(saved.oldGoldItems) && saved.oldGoldItems.length ? saved.oldGoldItems.map(normalizeOldGoldItem) : structuredClone(defaultState.oldGoldItems),
           payments: shouldResetNumber ? normalizePayments(defaultState.payments) : normalizePayments(saved.payments),
+          chit: shouldResetNumber ? normalizeChit(defaultState.chit) : normalizeChit(saved.chit),
           printedEstimates,
           numberResetVersion: NUMBER_RESET_VERSION
         };
@@ -1905,17 +2069,19 @@
       return { weight: "", purity: "", rate: "" };
     }
 
-    function createBlankEstimateState(serial, printedEstimates) {
+    function createBlankEstimateState(serial, printedEstimates, estimateType = "normal") {
       return {
         ...structuredClone(defaultState),
         estimateSerial: serial,
         estimateNo: createEstimateNo(serial),
         estimateDate: todayIso(),
+        estimateType: normalizeEstimateType(estimateType),
         customerName: "",
         customerPhone: "",
         items: [createEmptyItem()],
         oldGoldItems: [createEmptyOldGoldItem()],
         payments: { cash: "", card: "", upi: "" },
+        chit: { amount: "", bonus: "", weight: "" },
         printedEstimates,
         numberResetVersion: NUMBER_RESET_VERSION
       };
@@ -1944,10 +2110,31 @@
       };
     }
 
+    function normalizeChit(chit) {
+      return {
+        amount: chit && chit.amount ? chit.amount : "",
+        bonus: chit && chit.bonus ? chit.bonus : "",
+        weight: chit && chit.weight ? chit.weight : ""
+      };
+    }
+
+    function normalizeEstimateType(estimateType) {
+      return estimateType === "chit" ? "chit" : "normal";
+    }
+
+    function formatEstimateType(estimateType) {
+      return normalizeEstimateType(estimateType) === "chit" ? "Chit" : "Normal";
+    }
+
+    function estimateTypeClass(estimateType) {
+      return normalizeEstimateType(estimateType) === "chit" ? "type-pill-chit" : "";
+    }
+
     function normalizePrintedEstimate(record) {
       const dateIso = record.dateIso || isoFromDisplayDate(record.date) || "";
       return {
         estimateNo: record.estimateNo || "",
+        estimateType: normalizeEstimateType(record.estimateType),
         date: record.date || "",
         dateIso,
         customerName: record.customerName || "",
@@ -1962,6 +2149,13 @@
         cardPaid: toNumber(record.cardPaid),
         upiPaid: toNumber(record.upiPaid),
         totalPaid: toNumber(record.totalPaid),
+        chitAmount: toNumber(record.chitAmount),
+        chitBonus: toNumber(record.chitBonus),
+        chitWeight: toNumber(record.chitWeight),
+        chitRate: toNumber(record.chitRate),
+        chitWeightValue: toNumber(record.chitWeightValue),
+        chitWeightGst: toNumber(record.chitWeightGst),
+        chitDeductionTotal: toNumber(record.chitDeductionTotal),
         items: Array.isArray(record.items) ? record.items.map(normalizeItem) : [],
         oldGoldItems: Array.isArray(record.oldGoldItems) ? record.oldGoldItems.map(normalizeOldGoldItem) : []
       };
@@ -1974,6 +2168,7 @@
         estimateSerial: serial,
         estimateNo: record.estimateNo || createEstimateNo(serial),
         estimateDate: record.dateIso || isoFromDisplayDate(record.date) || todayIso(),
+        estimateType: normalizeEstimateType(record.estimateType),
         customerName: record.customerName || "",
         customerPhone: record.customerPhone || "",
         items: printableItemsFromRecord(record),
@@ -1982,6 +2177,11 @@
           cash: record.cashPaid ? String(record.cashPaid) : "",
           card: record.cardPaid ? String(record.cardPaid) : "",
           upi: record.upiPaid ? String(record.upiPaid) : ""
+        },
+        chit: {
+          amount: record.chitAmount ? String(record.chitAmount) : "",
+          bonus: record.chitBonus ? String(record.chitBonus) : "",
+          weight: record.chitWeight ? String(record.chitWeight) : ""
         },
         printedEstimates: existingState.printedEstimates,
         numberResetVersion: NUMBER_RESET_VERSION
@@ -2066,6 +2266,7 @@
 
       return {
         estimateNo: state.estimateNo,
+        estimateType: normalizeEstimateType(state.estimateType),
         dateIso: state.estimateDate,
         date: formatDate(state.estimateDate),
         customerName: cleanText(state.customerName),
@@ -2080,6 +2281,13 @@
         cardPaid: payments.card,
         upiPaid: payments.upi,
         totalPaid: payments.totalPaid,
+        chitAmount: totals.chitAmount,
+        chitBonus: totals.chitBonus,
+        chitWeight: totals.chitWeight,
+        chitRate: totals.chitRate,
+        chitWeightValue: totals.chitWeightValue,
+        chitWeightGst: totals.chitWeightGst,
+        chitDeductionTotal: totals.chitDeductionTotal,
         items: savedItems,
         oldGoldItems: savedOldGoldItems
       };
@@ -2127,12 +2335,18 @@
       const records = state.printedEstimates || [];
       const headers = [
         "Period",
+        "Estimate Type",
         "Item Name",
         "Number of Estimates",
         "Item Weight",
         "New Item Total",
         "Total Old Gold Weight",
         "Total Old Gold Value",
+        "Chit Amount",
+        "Chit Bonus",
+        "Chit Weight",
+        "Chit Weight Value",
+        "GST On Chit Weight",
         "Net Payable",
         "Cash Paid",
         "Card Paid",
@@ -2142,12 +2356,18 @@
       const summaryRows = appendTotalSummaryRow(buildSummaryRows(records, mode, selectedPeriod));
       const tableRows = summaryRows.map((summary) => [
         summary.period,
+        summary.estimateType,
         summary.itemName,
         toNumber(summary.count),
         toNumber(summary.itemWeight),
         toNumber(summary.newItemTotal),
         toNumber(summary.totalOldGoldWeight),
         toNumber(summary.totalOldGoldValue),
+        toNumber(summary.chitAmount),
+        toNumber(summary.chitBonus),
+        toNumber(summary.chitWeight),
+        toNumber(summary.chitWeightValue),
+        toNumber(summary.chitWeightGst),
         toNumber(summary.netPayable),
         toNumber(summary.cashPaid),
         toNumber(summary.cardPaid),
@@ -2170,6 +2390,11 @@
         runningTotal.newItemTotal += toNumber(row.newItemTotal);
         runningTotal.totalOldGoldWeight += toNumber(row.totalOldGoldWeight);
         runningTotal.totalOldGoldValue += toNumber(row.totalOldGoldValue);
+        runningTotal.chitAmount += toNumber(row.chitAmount);
+        runningTotal.chitBonus += toNumber(row.chitBonus);
+        runningTotal.chitWeight += toNumber(row.chitWeight);
+        runningTotal.chitWeightValue += toNumber(row.chitWeightValue);
+        runningTotal.chitWeightGst += toNumber(row.chitWeightGst);
         runningTotal.netPayable += toNumber(row.netPayable);
         runningTotal.cashPaid += toNumber(row.cashPaid);
         runningTotal.cardPaid += toNumber(row.cardPaid);
@@ -2178,12 +2403,18 @@
         return runningTotal;
       }, {
         period: "TOTAL",
+        estimateType: "",
         itemName: "",
         count: 0,
         itemWeight: 0,
         newItemTotal: 0,
         totalOldGoldWeight: 0,
         totalOldGoldValue: 0,
+        chitAmount: 0,
+        chitBonus: 0,
+        chitWeight: 0,
+        chitWeightValue: 0,
+        chitWeightGst: 0,
         netPayable: 0,
         cashPaid: 0,
         cardPaid: 0,
@@ -2273,12 +2504,18 @@
         const isFirstItem = index === 0;
         return {
           period,
+          estimateType: isFirstItem ? formatEstimateType(record.estimateType) : "",
           itemName: item.name,
           count: isFirstItem ? 1 : 0,
           itemWeight: item.weight,
           newItemTotal: item.amount,
           totalOldGoldWeight: isFirstItem ? toNumber(record.totalOldGoldWeight) : 0,
           totalOldGoldValue: isFirstItem ? toNumber(record.totalOldGoldValue) : 0,
+          chitAmount: isFirstItem ? toNumber(record.chitAmount) : 0,
+          chitBonus: isFirstItem ? toNumber(record.chitBonus) : 0,
+          chitWeight: isFirstItem ? toNumber(record.chitWeight) : 0,
+          chitWeightValue: isFirstItem ? toNumber(record.chitWeightValue) : 0,
+          chitWeightGst: isFirstItem ? toNumber(record.chitWeightGst) : 0,
           netPayable: isFirstItem ? toNumber(record.netPayable) : 0,
           cashPaid: isFirstItem ? toNumber(record.cashPaid) : 0,
           cardPaid: isFirstItem ? toNumber(record.cardPaid) : 0,
@@ -2311,7 +2548,7 @@
 
     function openNextBlankEstimate() {
       const nextSerial = nextSerialFromSavedEstimates();
-      state = createBlankEstimateState(nextSerial, state.printedEstimates);
+      state = createBlankEstimateState(nextSerial, state.printedEstimates, state.estimateType);
       persistAndRender();
     }
 
@@ -2338,15 +2575,19 @@
       return itemRows + oldGoldRows;
     }
 
-    function calculateItem(item) {
+    function calculateItem(item, itemIndex = -1) {
       const weight = toNumber(item.weight);
       const rate = toNumber(item.rate);
       const amount = toNumber(item.finalAmount);
-      const baseAmount = weight * rate;
-      const va = weight > 0 && rate > 0 && amount > 0 ? ((amount / baseAmount) - 1) * 100 : 0;
-      const vaWeight = weight * va / 100;
-      const billableWeight = weight + vaWeight;
-      return { weight, va, rate, vaWeight, billableWeight, amount };
+      const chitWeight = isChitEstimate() ? chitWeightForItem(itemIndex) : 0;
+      const balanceWeight = Math.max(0, weight - chitWeight);
+      const chitWeightValue = calculateChitWeightValue(chitWeight, rate);
+      const balanceAmount = Math.max(0, amount - chitWeightValue);
+      const baseAmount = balanceWeight * rate * (isChitEstimate() ? 1 + GST_RATE : 1);
+      const va = balanceWeight > 0 && rate > 0 && balanceAmount > 0 ? ((balanceAmount / baseAmount) - 1) * 100 : 0;
+      const vaWeight = balanceWeight * va / 100;
+      const billableWeight = balanceWeight + vaWeight;
+      return { weight, chitWeight, balanceWeight, chitWeightValue, balanceAmount, va, rate, vaWeight, billableWeight, amount };
     }
 
     function calculateOldGoldItem(item) {
@@ -2358,9 +2599,10 @@
     }
 
     function calculateTotals() {
-      const totals = state.items.reduce((runningTotals, item) => {
+      const isChit = isChitEstimate();
+      const totals = state.items.reduce((runningTotals, item, index) => {
         if (!hasItemContent(item)) return runningTotals;
-        const calc = calculateItem(item);
+        const calc = calculateItem(item, index);
         runningTotals.netWeight += calc.weight;
         runningTotals.vaWeight += calc.vaWeight;
         runningTotals.billableWeight += calc.billableWeight;
@@ -2374,6 +2616,13 @@
         subtotal: 0,
         grandTotal: 0,
         oldGoldTotal: 0,
+        chitAmount: 0,
+        chitBonus: 0,
+        chitWeight: 0,
+        chitRate: 0,
+        chitWeightValue: 0,
+        chitWeightGst: 0,
+        chitDeductionTotal: 0,
         netPayable: 0,
         taxableValue: 0,
         cgst: 0,
@@ -2383,11 +2632,56 @@
         if (!hasOldGoldContent(item)) return sum;
         return sum + calculateOldGoldItem(item).value;
       }, 0);
-      totals.netPayable = totals.grandTotal - totals.oldGoldTotal;
+      if (isChit) {
+        totals.chitAmount = toNumber(state.chit.amount);
+        totals.chitBonus = toNumber(state.chit.bonus);
+        totals.chitWeight = toNumber(state.chit.weight);
+        totals.chitRate = firstNonzeroItemRate();
+        totals.chitWeightValue = state.items.reduce((sum, item, index) => {
+          if (!hasItemContent(item)) return sum;
+          return sum + calculateItem(item, index).chitWeightValue;
+        }, 0);
+        totals.chitWeightGst = totals.chitWeightValue * GST_RATE;
+        totals.chitDeductionTotal = totals.chitAmount + totals.chitBonus + totals.chitWeightValue;
+      }
+      totals.netPayable = totals.grandTotal - totals.oldGoldTotal - totals.chitDeductionTotal + totals.chitWeightGst;
       return {
         ...totals,
         ...calculateInclusiveGst(totals.grandTotal)
       };
+    }
+
+    function firstNonzeroItemRate() {
+      const item = state.items.find((candidate) => toNumber(candidate.rate) > 0);
+      return item ? toNumber(item.rate) : 0;
+    }
+
+    function chitWeightForItem(itemIndex) {
+      if (!isChitEstimate() || itemIndex < 0) return 0;
+      let remainingChitWeight = toNumber(state.chit.weight);
+      for (let index = 0; index < state.items.length; index += 1) {
+        const itemWeight = toNumber(state.items[index].weight);
+        const allocatedWeight = Math.min(Math.max(remainingChitWeight, 0), itemWeight);
+        if (index === itemIndex) return allocatedWeight;
+        remainingChitWeight -= allocatedWeight;
+      }
+      return 0;
+    }
+
+    function calculateChitWeightValue(weight, rate) {
+      return toNumber(weight) * toNumber(rate);
+    }
+
+    function isChitEstimate() {
+      return normalizeEstimateType(state.estimateType) === "chit";
+    }
+
+    function validateChitWeight() {
+      if (!isChitEstimate()) return true;
+      const totals = calculateTotals();
+      if (totals.chitWeight <= totals.netWeight) return true;
+      window.alert(`Chit weight cannot be more than total net weight.\n\nNet weight: ${formatWeight(totals.netWeight)}\nChit weight: ${formatWeight(totals.chitWeight)}`);
+      return false;
     }
 
     function calculatePayments() {
