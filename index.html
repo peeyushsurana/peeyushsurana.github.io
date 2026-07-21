@@ -952,23 +952,32 @@
       }
     }
 
+    @page {
+      size: A5 portrait;
+      margin: 9mm;
+    }
+
     @media print {
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
       html,
       body {
+        width: auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
         background: #ffffff;
-      }
-
-      body.print-a4 {
-        width: 210mm;
-        min-height: 297mm;
-      }
-
-      body.print-a5 {
-        width: 148mm;
-        min-height: 210mm;
+        overflow: visible !important;
       }
 
       body {
+        position: static;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
@@ -984,63 +993,301 @@
       .invoice-preview {
         display: block;
         width: 100%;
+        max-width: none;
         margin: 0;
         padding: 0;
         border: 0;
         box-shadow: none;
         border-radius: 0;
+        box-sizing: border-box;
+        overflow: visible;
+      }
+
+      .app {
+        padding: 2mm;
+        border: 0.25mm solid #9ca3af;
+        -webkit-box-decoration-break: clone;
+        box-decoration-break: clone;
       }
 
       .invoice-pad {
-        padding: 0;
+        width: 100%;
+        padding: 2mm;
+        box-sizing: border-box;
+        overflow: visible;
       }
 
       .invoice-header-art {
-        width: 300px;
+        width: 46mm;
+        max-width: 100%;
       }
 
-      body.print-a5 .invoice-header-art {
-        width: 230px;
+      .invoice-head {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 2.5mm;
+        padding-bottom: 2.5mm;
+        break-inside: avoid;
+        page-break-inside: avoid;
       }
 
-      body.print-a5 .invoice-head {
-        gap: 12px;
-        padding-bottom: 12px;
+      .invoice-head > *,
+      .shop-block,
+      .estimate-box {
+        min-width: 0;
       }
 
-      body.print-a5 .party-row {
-        padding: 12px 0;
+      .shop-block {
+        gap: 1.5mm;
       }
 
-      body.print-a5 .invoice-table {
-        margin-top: 12px;
-        font-size: 10.5px;
+      .shop-detail,
+      .customer-detail,
+      .invoice-meta,
+      .terms {
+        font-size: 9.5px;
+        line-height: 1.35;
       }
 
-      body.print-a5 .invoice-table th,
-      body.print-a5 .invoice-table td {
-        padding: 7px 5px;
+      .estimate-box {
+        width: 34mm;
+        min-width: 30mm;
+        max-width: 34mm;
       }
 
-      body.print-a5 .total-area {
-        margin-top: 12px;
+      .estimate-label {
+        padding: 5px 7px;
+        font-size: 9.5px;
       }
 
-      body.print-a5 .total-table td {
-        padding: 5px 0;
+      .estimate-no {
+        margin: 8px 0 3px;
+        font-size: 12px;
       }
 
-      body.print-a5 .terms {
-        margin-top: 12px;
-        padding-top: 9px;
+      .party-row {
+        padding: 2.5mm 0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .party-title {
+        font-size: 10px;
       }
 
       .invoice-table {
+        width: 100%;
+        max-width: 100%;
+        margin: 2.5mm 0 0;
+        font-size: 9.5px;
+        table-layout: fixed;
         break-inside: auto;
+        page-break-inside: auto;
+      }
+
+      .invoice-table thead {
+        display: table-header-group;
+      }
+
+      .invoice-table tbody {
+        display: table-row-group;
+      }
+
+      .invoice-table th,
+      .invoice-table td {
+        padding: 1.4mm 0.8mm;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+      }
+
+      .invoice-table th:first-child,
+      .invoice-table td:first-child {
+        width: 5% !important;
+      }
+
+      #newGoldPrintTable th:nth-child(2),
+      #newGoldPrintTable td:nth-child(2) {
+        width: 27%;
+      }
+
+      #newGoldPrintTable th:nth-child(3),
+      #newGoldPrintTable td:nth-child(3) {
+        width: 12%;
+      }
+
+      #newGoldPrintTable th:nth-child(4),
+      #newGoldPrintTable td:nth-child(4) {
+        width: 13%;
+      }
+
+      #newGoldPrintTable th:nth-child(5),
+      #newGoldPrintTable td:nth-child(5) {
+        width: 10%;
+      }
+
+      #newGoldPrintTable th:nth-child(6),
+      #newGoldPrintTable td:nth-child(6) {
+        width: 15%;
+      }
+
+      #newGoldPrintTable th:nth-child(7),
+      #newGoldPrintTable td:nth-child(7) {
+        width: 18%;
+      }
+
+      #oldGoldPrintTable th:nth-child(2),
+      #oldGoldPrintTable td:nth-child(2) {
+        width: 20%;
+      }
+
+      #oldGoldPrintTable th:nth-child(3),
+      #oldGoldPrintTable td:nth-child(3) {
+        width: 18%;
+      }
+
+      #oldGoldPrintTable th:nth-child(4),
+      #oldGoldPrintTable td:nth-child(4) {
+        width: 25%;
+      }
+
+      #oldGoldPrintTable th:nth-child(5),
+      #oldGoldPrintTable td:nth-child(5) {
+        width: 32%;
+      }
+
+      .old-gold-print {
+        margin-top: 2.5mm;
+        break-inside: auto;
+        page-break-inside: auto;
+      }
+
+      .old-gold-print > .party-title {
+        break-after: avoid;
+        page-break-after: avoid;
+      }
+
+      .total-area {
+        margin-top: 2.5mm;
+        break-inside: avoid;
+        break-after: avoid;
+        page-break-inside: avoid;
+        page-break-after: avoid;
+      }
+
+      .total-table {
+        width: min(100%, 88mm);
+        max-width: 100%;
+        font-size: 9.5px;
+      }
+
+      .total-table td {
+        padding: 4px 0;
+      }
+
+      .grand-row td {
+        padding-top: 8px;
+        font-size: 14px;
+      }
+
+      .amount-words-row td {
+        padding-top: 7px;
+        font-size: 9.5px;
+      }
+
+      .terms {
+        margin-top: 2.5mm;
+        padding-top: 2mm;
+        break-inside: avoid;
+        page-break-inside: avoid;
       }
 
       tr {
         break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      body.print-density-compact .invoice-header-art {
+        width: 43mm;
+      }
+
+      body.print-density-compact .invoice-head {
+        gap: 8px;
+        padding-bottom: 8px;
+      }
+
+      body.print-density-compact .party-row {
+        padding: 7px 0;
+      }
+
+      body.print-density-compact .invoice-table {
+        margin-top: 7px;
+        font-size: 9.5px;
+      }
+
+      body.print-density-compact .invoice-table th,
+      body.print-density-compact .invoice-table td {
+        padding: 4px 3px;
+      }
+
+      body.print-density-compact .total-area,
+      body.print-density-compact .terms,
+      body.print-density-compact .old-gold-print {
+        margin-top: 7px;
+      }
+
+      body.print-density-dense .invoice-header-art {
+        width: 40mm;
+      }
+
+      body.print-density-dense .invoice-head {
+        gap: 6px;
+        padding-bottom: 6px;
+      }
+
+      body.print-density-dense .shop-detail,
+      body.print-density-dense .customer-detail,
+      body.print-density-dense .invoice-meta,
+      body.print-density-dense .terms {
+        font-size: 8.5px;
+        line-height: 1.25;
+      }
+
+      body.print-density-dense .estimate-label {
+        padding: 4px 6px;
+        font-size: 8.5px;
+      }
+
+      body.print-density-dense .estimate-no {
+        margin-top: 5px;
+        font-size: 10.5px;
+      }
+
+      body.print-density-dense .party-row {
+        padding: 5px 0;
+      }
+
+      body.print-density-dense .invoice-table {
+        margin-top: 5px;
+        font-size: 8.5px;
+      }
+
+      body.print-density-dense .invoice-table th,
+      body.print-density-dense .invoice-table td {
+        padding: 3px 2px;
+      }
+
+      body.print-density-dense .total-area,
+      body.print-density-dense .terms,
+      body.print-density-dense .old-gold-print {
+        margin-top: 5px;
+      }
+
+      body.print-density-dense .total-table {
+        font-size: 9px;
+      }
+
+      body.print-density-dense .total-table td {
+        padding: 3px 0;
       }
 
       .access-gate {
@@ -1160,7 +1407,8 @@
                   <th class="number-cell">Weight</th>
                   <th class="number-cell">Purity %</th>
                   <th class="number-cell">Rate</th>
-                  <th class="amount-cell">Value</th>
+                  <th class="amount-cell">Calculated value</th>
+                  <th class="amount-cell">Final value</th>
                   <th class="action-cell"></th>
                 </tr>
               </thead>
@@ -1298,7 +1546,7 @@
               </div>
             </section>
 
-            <table class="invoice-table">
+            <table class="invoice-table" id="newGoldPrintTable">
               <thead>
                 <tr>
                   <th style="width: 32px;">#</th>
@@ -1315,7 +1563,7 @@
 
             <section class="old-gold-print" id="oldGoldPrintSection" hidden>
               <h3 class="party-title">Old Gold</h3>
-              <table class="invoice-table">
+              <table class="invoice-table" id="oldGoldPrintTable">
                 <thead>
                   <tr>
                     <th style="width: 32px;">#</th>
@@ -1399,7 +1647,7 @@
 
   <datalist id="purityOptions">
     <option value="24K"></option>
-    <option value="22K"></option>
+    <option value="916-22K"></option>
     <option value="20K"></option>
     <option value="18K"></option>
     <option value="14K"></option>
@@ -1428,10 +1676,10 @@
       customerName: "",
       customerPhone: "",
       items: [
-        { name: "", weight: "", purity: "22K", rate: "", finalAmount: "" }
+        { name: "", weight: "", purity: "916-22K", rate: "", finalAmount: "" }
       ],
       oldGoldItems: [
-        { weight: "", purity: "", rate: "" }
+        { weight: "", purity: "", rate: "", finalValue: "" }
       ],
       payments: { cash: "", card: "", upi: "" },
       chit: { amount: "", bonus: "", weight: "" },
@@ -1723,7 +1971,7 @@
         row.innerHTML = `
           <td class="item-name-cell"><input aria-label="Item name" data-field="name" data-index="${index}" value="${escapeAttribute(item.name)}" placeholder="Ring"></td>
           <td class="number-cell"><input aria-label="Net weight" data-field="weight" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.weight)}" placeholder="Grams"></td>
-          <td class="purity-cell"><input aria-label="Purity" data-field="purity" data-index="${index}" list="purityOptions" value="${escapeAttribute(item.purity)}" placeholder="22K"></td>
+          <td class="purity-cell"><input aria-label="Purity" data-field="purity" data-index="${index}" list="purityOptions" value="${escapeAttribute(item.purity)}" placeholder="916-22K"></td>
           <td class="number-cell"><input aria-label="Rate" data-field="rate" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.rate)}" placeholder="Rate"></td>
           <td class="amount-cell"><input aria-label="Final amount" data-field="finalAmount" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.finalAmount)}" placeholder="Amount"></td>
           <td class="number-cell"><input aria-label="VA percentage" value="${escapeAttribute(formatNumber(calc.va, 2))}" readonly></td>
@@ -1773,7 +2021,8 @@
           <td class="number-cell"><input aria-label="Old gold weight" data-old-gold-field="weight" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.weight)}" placeholder="Grams"></td>
           <td class="number-cell"><input aria-label="Old gold purity percentage" data-old-gold-field="purity" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.purity)}" placeholder="%"></td>
           <td class="number-cell"><input aria-label="Old gold rate" data-old-gold-field="rate" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.rate)}" placeholder="Rate"></td>
-          <td class="amount-cell">${formatMoney(calc.value)}</td>
+          <td class="amount-cell">${formatMoney(calc.calculatedValue)}</td>
+          <td class="amount-cell"><input aria-label="Old gold final value" data-old-gold-field="finalValue" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.finalValue)}" placeholder="Optional"></td>
           <td class="action-cell">
             <button class="btn btn-icon btn-danger" type="button" data-remove-old-gold="${index}" aria-label="Remove old gold" title="Remove old gold">
               <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>
@@ -2062,11 +2311,11 @@
     }
 
     function createEmptyItem() {
-      return { name: "", weight: "", purity: "22K", rate: "", finalAmount: "" };
+      return { name: "", weight: "", purity: "916-22K", rate: "", finalAmount: "" };
     }
 
     function createEmptyOldGoldItem() {
-      return { weight: "", purity: "", rate: "" };
+      return { weight: "", purity: "", rate: "", finalValue: "" };
     }
 
     function createBlankEstimateState(serial, printedEstimates, estimateType = "normal") {
@@ -2210,7 +2459,8 @@
       return [{
         weight: weight ? String(weight) : "",
         purity: "100",
-        rate: weight ? String(value / weight) : String(value)
+        rate: weight ? String(value / weight) : String(value),
+        finalValue: ""
       }];
     }
 
@@ -2261,7 +2511,8 @@
       const savedOldGoldItems = printableOldGoldItems.map((item) => ({
         weight: cleanText(item.weight),
         purity: cleanText(item.purity),
-        rate: cleanText(item.rate)
+        rate: cleanText(item.rate),
+        finalValue: cleanText(item.finalValue)
       }));
 
       return {
@@ -2554,19 +2805,22 @@
 
     function applyPrintPaperSize() {
       clearPrintPaperSize();
-      const isA5 = printableRowCount() <= 4;
-      const size = isA5 ? "A5" : "A4";
-      const margin = isA5 ? "8mm" : "12mm";
-      document.body.classList.add(isA5 ? "print-a5" : "print-a4");
-      const style = document.createElement("style");
-      style.id = "printPageSizeStyle";
-      style.textContent = `@page { size: ${size}; margin: ${margin}; }`;
-      document.head.appendChild(style);
+      const rowCount = printableRowCount();
+      const densityClass = rowCount <= 4
+        ? "print-density-regular"
+        : rowCount <= 8
+          ? "print-density-compact"
+          : "print-density-dense";
+      document.body.classList.add("print-a5", densityClass);
     }
 
     function clearPrintPaperSize() {
-      document.body.classList.remove("print-a5", "print-a4");
-      document.getElementById("printPageSizeStyle")?.remove();
+      document.body.classList.remove(
+        "print-a5",
+        "print-density-regular",
+        "print-density-compact",
+        "print-density-dense"
+      );
     }
 
     function printableRowCount() {
@@ -2594,8 +2848,11 @@
       const weight = toNumber(item.weight);
       const purity = toNumber(item.purity);
       const rate = toNumber(item.rate);
-      const value = weight * purity / 100 * rate;
-      return { weight, purity, rate, value };
+      const calculatedValue = weight * purity / 100 * rate;
+      const hasFinalValue = cleanText(item.finalValue) !== "";
+      const finalValue = hasFinalValue ? toNumber(item.finalValue) : 0;
+      const value = hasFinalValue ? finalValue : calculatedValue;
+      return { weight, purity, rate, calculatedValue, finalValue, hasFinalValue, value };
     }
 
     function calculateTotals() {
@@ -2711,7 +2968,7 @@
     }
 
     function hasOldGoldContent(item) {
-      return ["weight", "purity", "rate"].some((key) => cleanText(item[key]));
+      return ["weight", "purity", "rate", "finalValue"].some((key) => cleanText(item[key]));
     }
 
     function formatNumber(value, maximumFractionDigits) {

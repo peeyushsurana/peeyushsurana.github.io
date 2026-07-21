@@ -1,0 +1,1622 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Surana Silver House Estimate</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f3f6f8;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #687386;
+      --line: #d7dee7;
+      --soft: #edf3f4;
+      --accent: #08755f;
+      --accent-dark: #075849;
+      --silver: #66788a;
+      --red: #b42318;
+      --shadow: 0 12px 30px rgba(23, 32, 51, 0.11);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    body:not(.access-granted) .app {
+      display: none;
+    }
+
+    .access-gate {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: #edf2f4;
+    }
+
+    body.access-granted .access-gate {
+      display: none;
+    }
+
+    .access-panel {
+      position: relative;
+      width: min(430px, 100%);
+      padding: 38px 36px 32px;
+      overflow: hidden;
+      border: 1px solid #cbd5df;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .access-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 5px;
+      background: var(--accent);
+    }
+
+    .access-logo {
+      display: block;
+      width: min(245px, 78%);
+      height: auto;
+      margin: 4px auto 12px;
+    }
+
+    .access-name {
+      margin: 0 0 6px;
+      font-size: 23px;
+      font-weight: 900;
+    }
+
+    .access-copy {
+      margin: 0 0 22px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .access-field {
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #4b5563;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 44px;
+      padding: 9px 11px;
+      border: 1px solid #cbd5df;
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--ink);
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(8, 117, 95, 0.14);
+    }
+
+    input[readonly] {
+      background: #eef2f5;
+      color: #4b5563;
+    }
+
+    .access-field input {
+      text-align: center;
+      font-size: 18px;
+    }
+
+    .access-btn {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 15px;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 850;
+    }
+
+    .access-btn:hover {
+      background: var(--accent-dark);
+    }
+
+    .access-error {
+      min-height: 21px;
+      margin-top: 12px;
+      color: var(--red);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .access-panel.access-shake {
+      animation: access-shake 0.35s ease;
+    }
+
+    @keyframes access-shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-7px); }
+      50% { transform: translateX(7px); }
+      75% { transform: translateX(-4px); }
+    }
+
+    .app {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px clamp(18px, 4vw, 42px);
+      border-bottom: 1px solid #cfd7df;
+      background: #ffffff;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border-radius: 50%;
+      background: #687b88;
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .brand-subtitle {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .section-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      width: 100%;
+      min-width: 0;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      min-height: 42px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border: 1px solid #cbd5df;
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .btn:hover {
+      background: #f4f7f9;
+    }
+
+    .btn-primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-dark);
+    }
+
+    .btn-danger {
+      width: 38px;
+      min-height: 38px;
+      padding: 0;
+      border-color: #f2c8c5;
+      color: var(--red);
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(480px, 0.92fr);
+      gap: 24px;
+      align-items: start;
+      padding: 24px clamp(18px, 4vw, 42px) 46px;
+    }
+
+    .editor {
+      display: grid;
+      width: 100%;
+      min-width: 0;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    .section {
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 5px 16px rgba(23, 32, 51, 0.05);
+      overflow: hidden;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 15px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .metric {
+      padding: 12px;
+      border-left: 3px solid var(--accent);
+      background: var(--soft);
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      margin-top: 5px;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .items-wrap {
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      margin-top: 15px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      isolation: isolate;
+      overscroll-behavior-x: contain;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .entry-table {
+      min-width: 850px;
+      font-size: 13px;
+    }
+
+    .entry-table th {
+      padding: 9px 7px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    .entry-table td {
+      padding: 7px;
+      border-bottom: 1px solid #e7ebf0;
+      vertical-align: middle;
+    }
+
+    .entry-table input,
+    .entry-table select {
+      min-height: 40px;
+      padding: 7px 8px;
+    }
+
+    .entry-table .number-cell {
+      width: 118px;
+    }
+
+    .entry-table .amount-cell {
+      width: 145px;
+    }
+
+    .entry-table .purity-cell {
+      width: 105px;
+    }
+
+    .entry-table .action-cell {
+      position: sticky;
+      right: 0;
+      z-index: 2;
+      width: 62px;
+      min-width: 62px;
+      background: #ffffff;
+      text-align: center;
+    }
+
+    .entry-table thead .action-cell {
+      z-index: 3;
+      background: #eef2f5;
+      font-size: 10px;
+    }
+
+    .row-total {
+      white-space: nowrap;
+      text-align: right;
+      font-weight: 850;
+    }
+
+    .preview-shell {
+      position: sticky;
+      top: 86px;
+      min-width: 0;
+      isolation: isolate;
+    }
+
+    .invoice-preview {
+      overflow: hidden;
+      border: 1px solid #d1d8e0;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #111827;
+      box-shadow: var(--shadow);
+    }
+
+    .invoice-pad {
+      padding: clamp(22px, 4vw, 36px);
+    }
+
+    .invoice-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: start;
+      padding-bottom: 16px;
+      border-bottom: 3px solid #172033;
+    }
+
+    .shop-block {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .invoice-header-art {
+      display: block;
+      width: min(100%, 300px);
+      height: auto;
+    }
+
+    .shop-detail,
+    .customer-detail,
+    .invoice-meta,
+    .terms {
+      color: #4b5563;
+      line-height: 1.42;
+      white-space: pre-line;
+    }
+
+    .estimate-box {
+      width: 155px;
+      text-align: right;
+    }
+
+    .estimate-label {
+      display: inline-flex;
+      padding: 6px 9px;
+      border-radius: 6px;
+      background: #e7f3f0;
+      color: var(--accent-dark);
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .invoice-meta {
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .party-row {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .party-title {
+      margin: 0 0 6px;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .invoice-table {
+      margin-top: 16px;
+      font-size: 12px;
+    }
+
+    .invoice-table th {
+      padding: 9px 7px;
+      border-bottom: 0;
+      background: #172033;
+      color: #ffffff;
+      vertical-align: bottom;
+    }
+
+    .invoice-table td {
+      padding: 9px 7px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    .empty-line {
+      color: #8a94a3;
+      font-style: italic;
+    }
+
+    .total-area {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+
+    .total-table {
+      width: min(100%, 380px);
+    }
+
+    .total-table td {
+      padding: 7px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .total-table td:last-child {
+      text-align: right;
+      font-weight: 850;
+    }
+
+    .grand-row td {
+      padding-top: 12px;
+      border-bottom: 0;
+      font-size: 18px;
+      font-weight: 950;
+    }
+
+    .amount-words-row td {
+      padding-top: 9px;
+      border-bottom: 0;
+      color: #374151;
+      line-height: 1.45;
+      text-align: left !important;
+      font-weight: 750 !important;
+    }
+
+    .terms {
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 1080px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-shell {
+        position: static;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .toolbar {
+        width: 100%;
+      }
+
+      .toolbar .btn {
+        flex: 1;
+      }
+
+      .grid,
+      .metrics,
+      .invoice-head {
+        grid-template-columns: 1fr;
+      }
+
+      .estimate-box {
+        width: auto;
+        text-align: left;
+      }
+
+      .total-area {
+        justify-content: stretch;
+      }
+
+      .total-table {
+        width: 100%;
+      }
+    }
+
+    @page {
+      size: A5 portrait;
+      margin: 9mm;
+    }
+
+    @media print {
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        background: #ffffff;
+      }
+
+      body {
+        position: static;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .access-gate,
+      .topbar,
+      .editor {
+        display: none !important;
+      }
+
+      .app,
+      .content,
+      .preview-shell,
+      .invoice-preview {
+        display: block;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        overflow: visible;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .app {
+        padding: 2mm;
+        border: 0.25mm solid #9ca3af;
+        -webkit-box-decoration-break: clone;
+        box-decoration-break: clone;
+      }
+
+      .invoice-pad {
+        width: 100%;
+        padding: 2mm;
+        overflow: visible;
+      }
+
+      .invoice-header-art {
+        width: 43mm;
+        max-width: 100%;
+      }
+
+      .invoice-head {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 2.5mm;
+        padding-bottom: 2.5mm;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .invoice-head > *,
+      .shop-block,
+      .estimate-box {
+        min-width: 0;
+      }
+
+      .shop-block {
+        gap: 1mm;
+      }
+
+      .shop-detail,
+      .customer-detail,
+      .invoice-meta,
+      .terms {
+        font-size: 9.5px;
+        line-height: 1.3;
+      }
+
+      .estimate-box {
+        width: 31mm;
+        min-width: 29mm;
+      }
+
+      .estimate-label {
+        padding: 4px 6px;
+        font-size: 9px;
+      }
+
+      .invoice-meta {
+        margin-top: 6px;
+      }
+
+      .party-row {
+        padding: 2.5mm 0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .party-title {
+        font-size: 10px;
+      }
+
+      .invoice-table {
+        width: 100%;
+        max-width: 100%;
+        margin: 2.5mm 0 0;
+        table-layout: fixed;
+        font-size: 9.5px;
+        break-inside: auto;
+        page-break-inside: auto;
+      }
+
+      .invoice-table thead {
+        display: table-header-group;
+      }
+
+      .invoice-table tbody {
+        display: table-row-group;
+      }
+
+      .invoice-table th,
+      .invoice-table td {
+        padding: 1.4mm 0.8mm;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+      }
+
+      #silverPrintTable th:nth-child(1),
+      #silverPrintTable td:nth-child(1) { width: 5%; }
+      #silverPrintTable th:nth-child(2),
+      #silverPrintTable td:nth-child(2) { width: 29%; }
+      #silverPrintTable th:nth-child(3),
+      #silverPrintTable td:nth-child(3) { width: 12%; }
+      #silverPrintTable th:nth-child(4),
+      #silverPrintTable td:nth-child(4) { width: 14%; }
+      #silverPrintTable th:nth-child(5),
+      #silverPrintTable td:nth-child(5) { width: 10%; }
+      #silverPrintTable th:nth-child(6),
+      #silverPrintTable td:nth-child(6) { width: 14%; }
+      #silverPrintTable th:nth-child(7),
+      #silverPrintTable td:nth-child(7) { width: 16%; }
+
+      .total-area {
+        margin-top: 2.5mm;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .total-table {
+        width: min(100%, 88mm);
+        max-width: 100%;
+        font-size: 9.5px;
+      }
+
+      .total-table td {
+        padding: 4px 0;
+      }
+
+      .grand-row td {
+        padding-top: 8px;
+        font-size: 14px;
+      }
+
+      .amount-words-row td {
+        padding-top: 7px;
+        font-size: 9.5px;
+      }
+
+      .terms {
+        margin-top: 2.5mm;
+        padding-top: 2mm;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      body.print-density-compact .invoice-header-art {
+        width: 40mm;
+      }
+
+      body.print-density-compact .party-row,
+      body.print-density-compact .invoice-table th,
+      body.print-density-compact .invoice-table td {
+        padding-top: 4px;
+        padding-bottom: 4px;
+      }
+
+      body.print-density-compact .invoice-table,
+      body.print-density-compact .total-area,
+      body.print-density-compact .terms {
+        margin-top: 7px;
+      }
+
+      body.print-density-dense .invoice-header-art {
+        width: 37mm;
+      }
+
+      body.print-density-dense .shop-detail,
+      body.print-density-dense .customer-detail,
+      body.print-density-dense .invoice-meta,
+      body.print-density-dense .terms {
+        font-size: 8.5px;
+        line-height: 1.2;
+      }
+
+      body.print-density-dense .party-row {
+        padding: 5px 0;
+      }
+
+      body.print-density-dense .invoice-table {
+        margin-top: 5px;
+        font-size: 8.5px;
+      }
+
+      body.print-density-dense .invoice-table th,
+      body.print-density-dense .invoice-table td {
+        padding: 3px 2px;
+      }
+
+      body.print-density-dense .total-area,
+      body.print-density-dense .terms {
+        margin-top: 5px;
+      }
+
+      body.print-density-dense .total-table {
+        font-size: 9px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="access-gate" aria-label="Access code">
+    <form class="access-panel" id="accessForm">
+      <img class="access-logo" src="surana-silver-house-logo.png" alt="Surana Silver House">
+      <p class="access-copy">Enter the access code to open the Silver estimate.</p>
+      <div class="access-field">
+        <label for="accessCode">Access code</label>
+        <input id="accessCode" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="access-btn" type="submit">Open app</button>
+      <div class="access-error" id="accessError" role="alert"></div>
+    </form>
+  </section>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">S</div>
+        <div>
+          <h1 class="brand-title">Surana Silver House</h1>
+          <p class="brand-subtitle">Silver Estimate Copy</p>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="btn" id="newEstimateBtn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5z"></path><path d="M14 2v6h6"></path><path d="M12 18v-6"></path><path d="M9 15h6"></path></svg>
+          New
+        </button>
+        <button class="btn btn-primary" id="printBtn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+          Print
+        </button>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="editor" aria-label="Silver estimate form">
+        <section class="section">
+          <h2 class="section-title">Customer</h2>
+          <div class="grid">
+            <div>
+              <label for="estimateDate">Date</label>
+              <input id="estimateDate" readonly>
+            </div>
+            <div>
+              <label for="customerName">Customer name</label>
+              <input id="customerName" autocomplete="name">
+            </div>
+            <div>
+              <label for="customerPhone">Customer phone</label>
+              <input id="customerPhone" inputmode="tel" autocomplete="tel">
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">Silver Items</h2>
+            <button class="btn" id="addItemBtn" type="button">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+              Add new silver
+            </button>
+          </div>
+          <div class="items-wrap">
+            <table class="entry-table">
+              <thead>
+                <tr>
+                  <th>Item name</th>
+                  <th class="number-cell">Net wt</th>
+                  <th class="purity-cell">Purity</th>
+                  <th class="number-cell">Rate</th>
+                  <th class="amount-cell">Final amount</th>
+                  <th class="number-cell">VA %</th>
+                  <th class="amount-cell">Total</th>
+                  <th class="action-cell">Delete</th>
+                </tr>
+              </thead>
+              <tbody id="itemsBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Totals</h2>
+          <div class="metrics">
+            <div class="metric">
+              <div class="metric-label">Net weight</div>
+              <div class="metric-value" id="netWeightMetric">0.000 g</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">VA weight</div>
+              <div class="metric-value" id="vaWeightMetric">0.000 g</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Total amount</div>
+              <div class="metric-value" id="grandTotalMetric">Rs. 0.00</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Payment</h2>
+          <div class="grid">
+            <div>
+              <label for="cashAmount">Cash</label>
+              <input id="cashAmount" inputmode="decimal" placeholder="Amount">
+            </div>
+            <div class="metric">
+              <div class="metric-label">Total paid</div>
+              <div class="metric-value" id="totalPaidMetric">Rs. 0.00</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="preview-shell" aria-label="Silver estimate preview">
+        <article class="invoice-preview">
+          <div class="invoice-pad">
+            <header class="invoice-head">
+              <div class="shop-block">
+                <img class="invoice-header-art" src="surana-silver-house-logo.png" alt="Surana Silver House">
+                <div>
+                  <div class="shop-detail" id="previewAddress"></div>
+                  <div class="shop-detail" id="previewPhone"></div>
+                  <div class="shop-detail" id="previewGstn"></div>
+                </div>
+              </div>
+              <div class="estimate-box">
+                <span class="estimate-label">Estimate Copy</span>
+                <div class="invoice-meta" id="previewDate"></div>
+              </div>
+            </header>
+
+            <section class="party-row">
+              <h3 class="party-title">Customer</h3>
+              <div class="customer-detail" id="previewCustomer">Walk-in customer</div>
+            </section>
+
+            <table class="invoice-table" id="silverPrintTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Item</th>
+                  <th>Purity</th>
+                  <th class="right">NET WT</th>
+                  <th class="right">VA %</th>
+                  <th class="right">RATE</th>
+                  <th class="right">TOTAL AMOUNT</th>
+                </tr>
+              </thead>
+              <tbody id="previewItems"></tbody>
+            </table>
+
+            <section class="total-area">
+              <table class="total-table">
+                <tbody>
+                  <tr>
+                    <td>Net weight</td>
+                    <td id="summaryNetWeight">0.000 g</td>
+                  </tr>
+                  <tr>
+                    <td>VA weight</td>
+                    <td id="summaryVaWeight">0.000 g</td>
+                  </tr>
+                  <tr>
+                    <td>Taxable value</td>
+                    <td id="summaryTaxableValue">Rs. 0.00</td>
+                  </tr>
+                  <tr>
+                    <td>CGST @ 1.5%</td>
+                    <td id="summaryCgst">Rs. 0.00</td>
+                  </tr>
+                  <tr>
+                    <td>SGST @ 1.5%</td>
+                    <td id="summarySgst">Rs. 0.00</td>
+                  </tr>
+                  <tr class="grand-row">
+                    <td>Total amount</td>
+                    <td id="summaryGrandTotal">Rs. 0.00</td>
+                  </tr>
+                  <tr class="amount-words-row">
+                    <td colspan="2">Amount in words: <span id="amountWords">Zero Rupees Only</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+
+            <footer class="terms">*Estimate valid for one day only*</footer>
+          </div>
+        </article>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const ACCESS_CODE = "__ACCESS_CODE__";
+    const accessSessionKey = "surana-estimate-access-ok-v1";
+    const GST_RATE = 0.03;
+    const CGST_RATE = 0.015;
+    const SGST_RATE = 0.015;
+    const businessDetails = {
+      shopName: "Surana Silver House",
+      gstn: "33BYQPV1193L1ZO",
+      phone: "+91 44 3551 5834",
+      address: "118, Rajaji Road, West Tambaram, Chennai - 600045"
+    };
+    const purityOptions = ["Reg", "80", "92.5", "999"];
+
+    let state = createBlankState();
+    let shouldResetAfterPrint = false;
+
+    const itemsBody = document.getElementById("itemsBody");
+    const addItemBtn = document.getElementById("addItemBtn");
+    const printBtn = document.getElementById("printBtn");
+    const newEstimateBtn = document.getElementById("newEstimateBtn");
+    const estimateDate = document.getElementById("estimateDate");
+    const customerName = document.getElementById("customerName");
+    const customerPhone = document.getElementById("customerPhone");
+    const cashAmount = document.getElementById("cashAmount");
+
+    initializeAccessGate();
+
+    function startApp() {
+      bindStaticFields();
+      render();
+
+      addItemBtn.addEventListener("click", () => {
+        state.items.push(createEmptyItem());
+        applyCashAllocation();
+        renderItemRows();
+        renderSummaryAndPreview();
+        const inputs = itemsBody.querySelectorAll("input[data-item-field='name']");
+        const lastInput = inputs[inputs.length - 1];
+        if (lastInput) lastInput.focus();
+      });
+
+      newEstimateBtn.addEventListener("click", resetEstimate);
+
+      printBtn.addEventListener("click", () => {
+        state.date = todayIso();
+        renderStaticFields();
+        renderSummaryAndPreview();
+        applyPrintDensity();
+        shouldResetAfterPrint = true;
+        window.print();
+      });
+
+      window.addEventListener("beforeprint", () => {
+        state.date = todayIso();
+        renderStaticFields();
+        renderSummaryAndPreview();
+        applyPrintDensity();
+      });
+
+      window.addEventListener("afterprint", () => {
+        clearPrintDensity();
+        if (!shouldResetAfterPrint) return;
+        shouldResetAfterPrint = false;
+        resetEstimate();
+      });
+    }
+
+    function bindStaticFields() {
+      customerName.addEventListener("input", () => {
+        state.customerName = customerName.value;
+        renderSummaryAndPreview();
+      });
+
+      customerPhone.addEventListener("input", () => {
+        state.customerPhone = customerPhone.value;
+        renderSummaryAndPreview();
+      });
+
+      cashAmount.addEventListener("input", () => {
+        state.cash = cashAmount.value;
+        if (hasControllingCash()) {
+          applyCashAllocation();
+        } else {
+          state.items.forEach((item) => {
+            if (item.calculationMode === "cash") {
+              item.calculationMode = "amount";
+              updateItemFromAmount(item);
+            }
+          });
+        }
+        renderItemRows();
+        renderSummaryAndPreview();
+        document.getElementById("totalPaidMetric").textContent = formatMoney(toNumber(state.cash));
+      });
+    }
+
+    function createBlankState() {
+      return {
+        date: todayIso(),
+        customerName: "",
+        customerPhone: "",
+        cash: "",
+        items: [createEmptyItem()]
+      };
+    }
+
+    function createEmptyItem() {
+      return {
+        name: "",
+        weight: "",
+        purity: "Reg",
+        rate: "",
+        finalAmount: "",
+        va: "",
+        calculationMode: "amount"
+      };
+    }
+
+    function resetEstimate() {
+      state = createBlankState();
+      render();
+    }
+
+    function render() {
+      renderStaticFields();
+      renderItemRows();
+      renderSummaryAndPreview();
+    }
+
+    function renderStaticFields() {
+      estimateDate.value = formatDate(state.date);
+      customerName.value = state.customerName;
+      customerPhone.value = state.customerPhone;
+      cashAmount.value = state.cash;
+      document.getElementById("totalPaidMetric").textContent = formatMoney(toNumber(state.cash));
+    }
+
+    function renderItemRows() {
+      itemsBody.innerHTML = "";
+      state.items.forEach((item, index) => {
+        const calc = calculateItem(item);
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td><input aria-label="Item name" data-item-field="name" value="${escapeAttribute(item.name)}" placeholder="Silver item"></td>
+          <td class="number-cell"><input aria-label="Net weight" data-item-field="weight" inputmode="decimal" value="${escapeAttribute(item.weight)}" placeholder="Grams"></td>
+          <td class="purity-cell">
+            <select aria-label="Purity" data-item-field="purity">
+              ${purityOptions.map((option) => `<option value="${option}"${item.purity === option ? " selected" : ""}>${option}</option>`).join("")}
+            </select>
+          </td>
+          <td class="number-cell"><input aria-label="Rate" data-item-field="rate" inputmode="decimal" value="${escapeAttribute(item.rate)}" placeholder="Rate"></td>
+          <td class="amount-cell"><input aria-label="Final amount" data-item-field="finalAmount" inputmode="decimal" value="${escapeAttribute(item.finalAmount)}" placeholder="Amount"></td>
+          <td class="number-cell"><input aria-label="VA percentage" data-item-field="va" inputmode="decimal" value="${escapeAttribute(item.va)}" placeholder="VA %"></td>
+          <td class="amount-cell row-total" data-row-total>${formatMoney(calc.amount)}</td>
+          <td class="action-cell">
+            <button class="btn btn-danger" type="button" data-remove-item="${index}" aria-label="Delete line item" title="Delete line item">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>
+            </button>
+          </td>
+        `;
+        itemsBody.appendChild(row);
+
+        row.querySelectorAll("[data-item-field]").forEach((control) => {
+          control.addEventListener("input", () => {
+            const field = control.dataset.itemField;
+            const currentItem = state.items[index];
+            currentItem[field] = control.value;
+
+            if (field === "va") {
+              currentItem.calculationMode = "va";
+              updateItemFromVa(currentItem);
+            } else if (field === "finalAmount") {
+              currentItem.calculationMode = "amount";
+              updateItemFromAmount(currentItem);
+            } else if (field === "weight" || field === "rate") {
+              if (currentItem.calculationMode === "va") {
+                updateItemFromVa(currentItem);
+              } else {
+                updateItemFromAmount(currentItem);
+              }
+            }
+
+            if (hasControllingCash()) {
+              applyCashAllocation();
+            }
+            syncRenderedItemValues();
+            renderSummaryAndPreview();
+          });
+        });
+      });
+
+      itemsBody.querySelectorAll("[data-remove-item]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.items.splice(Number(button.dataset.removeItem), 1);
+          if (state.items.length === 0) state.items.push(createEmptyItem());
+          applyCashAllocation();
+          renderItemRows();
+          renderSummaryAndPreview();
+        });
+      });
+    }
+
+    function renderSummaryAndPreview() {
+      const totals = calculateTotals();
+      const customerParts = [
+        cleanText(state.customerName) || "Walk-in customer",
+        cleanText(state.customerPhone) ? `Phone: ${cleanText(state.customerPhone)}` : ""
+      ].filter(Boolean);
+
+      document.getElementById("netWeightMetric").textContent = formatWeight(totals.netWeight);
+      document.getElementById("vaWeightMetric").textContent = formatWeight(totals.vaWeight);
+      document.getElementById("grandTotalMetric").textContent = formatMoney(totals.grandTotal);
+
+      document.getElementById("previewAddress").textContent = businessDetails.address;
+      document.getElementById("previewPhone").textContent = `Phone: ${businessDetails.phone}`;
+      document.getElementById("previewGstn").textContent = `GSTN: ${businessDetails.gstn}`;
+      document.getElementById("previewDate").textContent = formatDate(state.date);
+      document.getElementById("previewCustomer").textContent = customerParts.join("\n");
+
+      const previewItems = document.getElementById("previewItems");
+      previewItems.innerHTML = "";
+      const printableItems = state.items.filter(hasItemContent);
+      if (printableItems.length === 0) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td colspan="7" class="empty-line">No items added</td>`;
+        previewItems.appendChild(row);
+      } else {
+        printableItems.forEach((item, index) => {
+          const calc = calculateItem(item);
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${escapeHtml(cleanText(item.name) || "Silver item")}</td>
+            <td>${escapeHtml(item.purity || "Reg")}</td>
+            <td class="right">${formatWeight(calc.weight)}</td>
+            <td class="right">${formatPercent(calc.va)}</td>
+            <td class="right">${formatMoney(calc.rate)}</td>
+            <td class="right">${formatMoney(calc.amount)}</td>
+          `;
+          previewItems.appendChild(row);
+        });
+      }
+
+      document.getElementById("summaryNetWeight").textContent = formatWeight(totals.netWeight);
+      document.getElementById("summaryVaWeight").textContent = formatWeight(totals.vaWeight);
+      document.getElementById("summaryTaxableValue").textContent = formatMoney(totals.taxableValue);
+      document.getElementById("summaryCgst").textContent = formatMoney(totals.cgst);
+      document.getElementById("summarySgst").textContent = formatMoney(totals.sgst);
+      document.getElementById("summaryGrandTotal").textContent = formatMoney(totals.grandTotal);
+      document.getElementById("amountWords").textContent = numberToIndianWords(Math.round(totals.grandTotal));
+    }
+
+    function calculateItem(item) {
+      const weight = toNumber(item.weight);
+      const rate = toNumber(item.rate);
+      const amount = cleanText(item.finalAmount) ? toNumber(item.finalAmount) : 0;
+      const baseAmount = weight * rate;
+      const calculatedVa = baseAmount > 0 && cleanText(item.finalAmount)
+        ? ((amount / baseAmount) - 1) * 100
+        : 0;
+      const va = (item.calculationMode === "va" || item.calculationMode === "cash") && cleanText(item.va)
+        ? toNumber(item.va)
+        : calculatedVa;
+      const vaWeight = weight * va / 100;
+      return { weight, rate, amount, va, vaWeight };
+    }
+
+    function updateItemFromVa(item) {
+      const baseAmount = toNumber(item.weight) * toNumber(item.rate);
+      if (!cleanText(item.va) || baseAmount <= 0) {
+        item.finalAmount = "";
+        return;
+      }
+      item.finalAmount = formatInputAmount(baseAmount * (1 + toNumber(item.va) / 100));
+    }
+
+    function updateItemFromAmount(item) {
+      const baseAmount = toNumber(item.weight) * toNumber(item.rate);
+      if (!cleanText(item.finalAmount) || baseAmount <= 0) {
+        item.va = "";
+        return;
+      }
+      item.va = formatInputNumber(((toNumber(item.finalAmount) / baseAmount) - 1) * 100);
+    }
+
+    function hasControllingCash() {
+      return cleanText(state.cash) !== "";
+    }
+
+    function applyCashAllocation() {
+      if (!hasControllingCash()) return;
+
+      const eligibleItems = state.items
+        .map((item) => ({ item, baseAmount: toNumber(item.weight) * toNumber(item.rate) }))
+        .filter(({ baseAmount }) => baseAmount > 0);
+
+      state.items.forEach((item) => {
+        if (toNumber(item.weight) * toNumber(item.rate) <= 0) {
+          item.finalAmount = "";
+          item.va = "";
+          item.calculationMode = "cash";
+        }
+      });
+
+      if (eligibleItems.length === 0) return;
+
+      const totalBase = eligibleItems.reduce((sum, entry) => sum + entry.baseAmount, 0);
+      const cashCents = Math.round(toNumber(state.cash) * 100);
+      const commonVa = ((cashCents / 100 / totalBase) - 1) * 100;
+      let remainingCents = cashCents;
+
+      eligibleItems.forEach(({ item, baseAmount }, index) => {
+        const isLast = index === eligibleItems.length - 1;
+        const itemCents = isLast
+          ? remainingCents
+          : Math.round(cashCents * baseAmount / totalBase);
+        remainingCents -= itemCents;
+        item.finalAmount = (itemCents / 100).toFixed(2);
+        item.va = formatInputNumber(commonVa);
+        item.calculationMode = "cash";
+      });
+    }
+
+    function syncRenderedItemValues() {
+      Array.from(itemsBody.rows).forEach((row, index) => {
+        const item = state.items[index];
+        if (!item) return;
+        const finalAmountInput = row.querySelector('[data-item-field="finalAmount"]');
+        const vaInput = row.querySelector('[data-item-field="va"]');
+        if (finalAmountInput) finalAmountInput.value = item.finalAmount;
+        if (vaInput) vaInput.value = item.va;
+        const totalCell = row.querySelector("[data-row-total]");
+        if (totalCell) totalCell.textContent = formatMoney(calculateItem(item).amount);
+      });
+    }
+
+    function calculateTotals() {
+      const totals = state.items.reduce((sum, item) => {
+        if (!hasItemContent(item)) return sum;
+        const calc = calculateItem(item);
+        sum.netWeight += calc.weight;
+        sum.vaWeight += calc.vaWeight;
+        sum.grandTotal += calc.amount;
+        return sum;
+      }, { netWeight: 0, vaWeight: 0, grandTotal: 0 });
+      const taxableValue = totals.grandTotal / (1 + GST_RATE);
+      return {
+        ...totals,
+        taxableValue,
+        cgst: taxableValue * CGST_RATE,
+        sgst: taxableValue * SGST_RATE
+      };
+    }
+
+    function hasItemContent(item) {
+      return ["name", "weight", "rate", "finalAmount", "va"].some((key) => cleanText(item[key]));
+    }
+
+    function applyPrintDensity() {
+      clearPrintDensity();
+      const rowCount = state.items.filter(hasItemContent).length;
+      const density = rowCount <= 4
+        ? "print-density-regular"
+        : rowCount <= 8
+          ? "print-density-compact"
+          : "print-density-dense";
+      document.body.classList.add(density);
+    }
+
+    function clearPrintDensity() {
+      document.body.classList.remove("print-density-regular", "print-density-compact", "print-density-dense");
+    }
+
+    async function initializeAccessGate() {
+      const accessForm = document.getElementById("accessForm");
+      const accessCode = document.getElementById("accessCode");
+      const accessError = document.getElementById("accessError");
+      let appStarted = false;
+      const activeAccessCode = await resolveAccessCode();
+
+      function unlockApp() {
+        if (appStarted) return;
+        appStarted = true;
+        document.body.classList.add("access-granted");
+        sessionStorage.setItem(accessSessionKey, "true");
+        startApp();
+      }
+
+      if (!activeAccessCode) {
+        accessError.textContent = "Access code is not configured. Open this folder with a local server so the browser can read .env.";
+      }
+
+      if (activeAccessCode && sessionStorage.getItem(accessSessionKey) === "true") {
+        unlockApp();
+        return;
+      }
+
+      accessForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (!activeAccessCode) {
+          accessError.textContent = "Could not read .env. In Terminal run: python3 -m http.server 8000, then open http://localhost:8000/silver-estimate.html";
+          accessCode.focus();
+          return;
+        }
+        if (accessCode.value.trim() === activeAccessCode) {
+          accessError.textContent = "";
+          unlockApp();
+          return;
+        }
+        accessError.textContent = "Incorrect access code.";
+        accessCode.value = "";
+        accessCode.focus();
+        const panel = accessForm.closest(".access-panel") || accessForm;
+        panel.classList.remove("access-shake");
+        void panel.offsetWidth;
+        panel.classList.add("access-shake");
+      });
+    }
+
+    async function resolveAccessCode() {
+      const placeholder = ["__ACCESS", "_CODE__"].join("");
+      if (ACCESS_CODE !== placeholder) return ACCESS_CODE.trim();
+      return parseEnvSecret(await readLocalEnv());
+    }
+
+    async function readLocalEnv() {
+      try {
+        const response = await fetch(".env", { cache: "no-store" });
+        if (response.ok) return response.text();
+      } catch {}
+      return new Promise((resolve) => {
+        try {
+          const request = new XMLHttpRequest();
+          request.open("GET", ".env", true);
+          request.onload = () => resolve(request.status === 0 || request.status === 200 ? request.responseText : "");
+          request.onerror = () => resolve("");
+          request.send();
+        } catch {
+          resolve("");
+        }
+      });
+    }
+
+    function parseEnvSecret(envText) {
+      const match = String(envText || "").match(/^SECRET=(.*)$/m);
+      return match ? match[1].trim().replace(/^['"]|['"]$/g, "") : "";
+    }
+
+    function todayIso() {
+      const now = new Date();
+      const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+      return localDate.toISOString().slice(0, 10);
+    }
+
+    function formatDate(dateIso) {
+      const date = new Date(`${dateIso || todayIso()}T00:00:00`);
+      return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+    }
+
+    function formatNumber(value, maximumFractionDigits) {
+      return toNumber(value).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits });
+    }
+
+    function formatInputAmount(value) {
+      return toNumber(value).toFixed(2);
+    }
+
+    function formatInputNumber(value) {
+      const rounded = Math.abs(toNumber(value)) < 0.0000005 ? 0 : Number(toNumber(value).toFixed(6));
+      return String(rounded);
+    }
+
+    function formatMoney(value) {
+      return `Rs. ${toNumber(value).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    function formatWeight(value) {
+      return `${toNumber(value).toLocaleString("en-IN", { minimumFractionDigits: 3, maximumFractionDigits: 3 })} g`;
+    }
+
+    function formatPercent(value) {
+      return `${formatNumber(value, 2)}%`;
+    }
+
+    function toNumber(value) {
+      const parsed = Number(String(value || "").replace(/,/g, "").trim());
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function cleanText(value) {
+      return String(value || "").trim();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replace(/`/g, "&#096;");
+    }
+
+    function numberToIndianWords(value) {
+      const number = Math.max(0, Math.floor(Number(value) || 0));
+      if (number === 0) return "Zero Rupees Only";
+      const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+      const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+      function belowHundred(n) {
+        if (n < 20) return ones[n];
+        return `${tens[Math.floor(n / 10)]} ${ones[n % 10]}`.trim();
+      }
+
+      function belowThousand(n) {
+        const hundred = Math.floor(n / 100);
+        const rest = n % 100;
+        if (hundred && rest) return `${ones[hundred]} Hundred ${belowHundred(rest)}`;
+        if (hundred) return `${ones[hundred]} Hundred`;
+        return belowHundred(rest);
+      }
+
+      const parts = [];
+      let remainder = number;
+      [["Crore", 10000000], ["Lakh", 100000], ["Thousand", 1000], ["", 1]].forEach(([label, divisor]) => {
+        const groupValue = Math.floor(remainder / divisor);
+        if (groupValue > 0) {
+          parts.push(`${belowThousand(groupValue)} ${label}`.trim());
+          remainder %= divisor;
+        }
+      });
+      return `${parts.join(" ")} Rupees Only`;
+    }
+  </script>
+</body>
+</html>

@@ -45,15 +45,19 @@ jobs:
           # and export CODE so the python helper can read it safely.
           export CODE
           python3 - <<'PY'
-          import os, re
+          import os
           code = os.environ["CODE"]
-          with open("index.html", "r", encoding="utf-8") as f:
-              html = f.read()
-          html = html.replace('const ACCESS_CODE = "__ACCESS_CODE__"',
-                              'const ACCESS_CODE = ' + ('"' + code.replace('\\', '\\\\').replace('"', '\\"') + '"'))
-          with open("index.html", "w", encoding="utf-8") as f:
-              f.write(html)
-          print("Access code injected.")
+          replacement = 'const ACCESS_CODE = ' + ('"' + code.replace('\\', '\\\\').replace('"', '\\"') + '"')
+          for filename in ("index.html", "silver-estimate.html"):
+              with open(filename, "r", encoding="utf-8") as f:
+                  html = f.read()
+              placeholder = 'const ACCESS_CODE = "__ACCESS_CODE__"'
+              if placeholder not in html:
+                  raise SystemExit(f"Access code placeholder missing from {filename}.")
+              html = html.replace(placeholder, replacement, 1)
+              with open(filename, "w", encoding="utf-8") as f:
+                  f.write(html)
+              print(f"Access code injected into {filename}.")
           PY
 
       - name: Upload Pages artifact

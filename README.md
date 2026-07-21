@@ -1,6 +1,6 @@
 # Surana Jewellers Estimate App
 
-This repository hosts a simple static HTML estimate app for Surana Jewellers.
+This repository hosts static Gold and Silver estimate apps for Surana Jewellers and Surana Silver House.
 
 Live site after GitHub Pages deployment:
 
@@ -8,12 +8,20 @@ Live site after GitHub Pages deployment:
 https://peeyushsurana.github.io
 ```
 
-The app runs fully in the browser. It uses a simple access-code screen generated from a GitHub repository secret named `SECRET` during deployment.
+Silver estimate page:
+
+```text
+https://peeyushsurana.github.io/silver-estimate.html
+```
+
+Both apps run fully in the browser. They use the same access-code screen generated from a GitHub repository secret named `SECRET` during deployment.
 
 ## Files In This Repository
 
 - `index.html` - the estimate app opened by GitHub Pages.
-- `surana-header-black.png` - the header logo used inside the estimate.
+- `silver-estimate.html` - the separate Surana Silver House estimate app.
+- `surana-header-black.png` - the header logo used by the Gold estimate.
+- `surana-silver-house-logo.png` - the header logo used by the Silver estimate.
 - `.github/workflows/deploy-pages.yml` - deploys the site and adds the access-code hash.
 - `.gitignore` - keeps local/private files out of Git.
 
@@ -71,7 +79,7 @@ From the folder containing this `README.md`, run:
 ```bash
 git init
 git branch -M main
-git add index.html surana-header-black.png README.md .gitignore .github/workflows/deploy-pages.yml
+git add index.html silver-estimate.html surana-header-black.png surana-silver-house-logo.png README.md .gitignore .github/workflows/deploy-pages.yml
 git commit -m "Deploy Surana Jewellers estimate app"
 git remote add origin https://github.com/peeyushsurana/peeyushsurana.github.io.git
 git push -u origin main
@@ -86,7 +94,7 @@ For a fine-grained Personal Access Token, choose the repository `peeyushsurana.g
 
 ## Deploy With GitHub Pages
 
-For this app, GitHub Pages should deploy using GitHub Actions because the workflow reads the repository secret named `SECRET` and creates the access-code check.
+For these apps, GitHub Pages should deploy using GitHub Actions because the workflow reads the repository secret named `SECRET` and adds the same access-code check to both the Gold and Silver pages.
 
 Before the first deployment:
 
@@ -123,13 +131,15 @@ Important: this is a simple access gate for a static website. It keeps the plain
 
 For stronger protection, use a service with real authentication, such as Cloudflare Access, Netlify password protection, Vercel authentication, or a private internal app.
 
-## Saved Estimates Storage
+## Gold Saved Estimates Storage
 
-Saved estimates are stored locally in the browser on the same computer using browser storage. They remain after closing and reopening the browser, and they stay saved until they are deleted from the app or the browser's site data is manually cleared.
+Gold saved estimates are stored locally in the browser on the same computer using browser storage. They remain after closing and reopening the browser, and they stay saved until they are deleted from the app or the browser's site data is manually cleared.
 
 Use the same browser and the same website address to see the same saved estimates. Local testing at `localhost` and the deployed GitHub Pages site have separate browser storage.
 
 The app also asks the browser for persistent storage to reduce the chance that saved estimates are cleared automatically.
+
+The Silver estimate is print-only. It does not save Silver estimates or change the Gold saved-estimate history. Its VA and Final Amount fields work in both directions: entering VA calculates Final Amount, while entering Final Amount calculates VA. When Cash is entered, Cash becomes the controlling invoice total and is distributed proportionally across all valid item rows.
 
 ## Test Locally With `.env`
 
@@ -138,7 +148,7 @@ For local testing, `index.html` tries to read `.env` from the same folder.
 Create `.env`:
 
 ```env
-SECRET=password
+SECRET=choose-your-private-access-code
 ```
 
 Open `index.html` in your browser and enter the value from `.env`.
@@ -154,6 +164,14 @@ Then open:
 ```text
 http://localhost:8000
 ```
+
+For the Silver estimate, open:
+
+```text
+http://localhost:8000/silver-estimate.html
+```
+
+Both pages read the same `SECRET` value from `.env` during local testing.
 
 Do not commit `.env`; it is ignored by `.gitignore`.
 
@@ -171,7 +189,7 @@ If you add private keys, passwords, API tokens, or other secrets later:
 After changing files, push updates with:
 
 ```bash
-git add index.html surana-header-black.png README.md .gitignore .github/workflows/deploy-pages.yml
+git add index.html silver-estimate.html surana-header-black.png surana-silver-house-logo.png README.md .gitignore .github/workflows/deploy-pages.yml
 git commit -m "Update estimate app"
 git push
 ```
