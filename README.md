@@ -2,10 +2,10 @@
 
 This repository hosts static Gold and Silver estimate apps for Surana Jewellers and Surana Silver House.
 
-Live site after GitHub Pages deployment:
+Gold estimate page:
 
 ```text
-https://peeyushsurana.github.io
+https://peeyushsurana.github.io/gold-estimate.html
 ```
 
 Silver estimate page:
@@ -18,7 +18,8 @@ Both apps run fully in the browser. They use the same access-code screen generat
 
 ## Files In This Repository
 
-- `index.html` - the estimate app opened by GitHub Pages.
+- `index.html` - redirects the root GitHub Pages address to the Gold estimate.
+- `gold-estimate.html` - the Surana Jewellers Gold estimate app.
 - `silver-estimate.html` - the separate Surana Silver House estimate app.
 - `surana-header-black.png` - the header logo used by the Gold estimate.
 - `surana-silver-house-logo.png` - the header logo used by the Silver estimate.
@@ -79,7 +80,7 @@ From the folder containing this `README.md`, run:
 ```bash
 git init
 git branch -M main
-git add index.html silver-estimate.html surana-header-black.png surana-silver-house-logo.png README.md .gitignore .github/workflows/deploy-pages.yml
+git add index.html gold-estimate.html silver-estimate.html surana-header-black.png surana-silver-house-logo.png README.md .gitignore .github/workflows/deploy-pages.yml
 git commit -m "Deploy Surana Jewellers estimate app"
 git remote add origin https://github.com/peeyushsurana/peeyushsurana.github.io.git
 git push -u origin main
@@ -118,7 +119,7 @@ Then configure Pages:
 After pushing, wait a minute and open:
 
 ```text
-https://peeyushsurana.github.io
+https://peeyushsurana.github.io/gold-estimate.html
 ```
 
 If it does not appear, open the repository and click `Actions`. The latest workflow run should show whether deployment succeeded or failed.
@@ -145,7 +146,7 @@ The Silver estimate is print-only. It does not save Silver estimates or change t
 
 ## Test Locally With `.env`
 
-For local testing, `index.html` tries to read `.env` from the same folder.
+For local testing, `gold-estimate.html` tries to read `.env` from the same folder.
 
 Create `.env`:
 
@@ -153,7 +154,7 @@ Create `.env`:
 SECRET=choose-your-private-access-code
 ```
 
-Open `index.html` in your browser and enter the value from `.env`.
+Open `gold-estimate.html` in your browser and enter the value from `.env`.
 
 If the browser blocks reading `.env`, run a small local server from the project folder:
 
@@ -164,7 +165,7 @@ python3 -m http.server 8000
 Then open:
 
 ```text
-http://localhost:8000
+http://localhost:8000/gold-estimate.html
 ```
 
 For the Silver estimate, open:
@@ -191,7 +192,7 @@ If you add private keys, passwords, API tokens, or other secrets later:
 After changing files, push updates with:
 
 ```bash
-git add index.html silver-estimate.html surana-header-black.png surana-silver-house-logo.png README.md .gitignore .github/workflows/deploy-pages.yml
+git add index.html gold-estimate.html silver-estimate.html surana-header-black.png surana-silver-house-logo.png README.md .gitignore .github/workflows/deploy-pages.yml
 git commit -m "Update estimate app"
 git push
 ```

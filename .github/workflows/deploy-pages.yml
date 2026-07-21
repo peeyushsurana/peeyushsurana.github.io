@@ -48,7 +48,7 @@ jobs:
           import os
           code = os.environ["CODE"]
           replacement = 'const ACCESS_CODE = ' + ('"' + code.replace('\\', '\\\\').replace('"', '\\"') + '"')
-          for filename in ("index.html", "silver-estimate.html"):
+          for filename in ("gold-estimate.html", "silver-estimate.html"):
               with open(filename, "r", encoding="utf-8") as f:
                   html = f.read()
               placeholder = 'const ACCESS_CODE = "__ACCESS_CODE__"'

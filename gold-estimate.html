@@ -1,0 +1,3479 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gold Jewellery Estimate</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #687386;
+      --line: #d9e0eb;
+      --soft: #eef3f8;
+      --gold: #b8872d;
+      --gold-dark: #7b5516;
+      --green: #08755f;
+      --red: #b42318;
+      --blue: #2559a8;
+      --shadow: 0 14px 34px rgba(23, 32, 51, 0.12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    body:not(.access-granted) .app {
+      display: none;
+    }
+
+    .access-gate {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(900px 500px at 50% -10%, rgba(184, 135, 45, 0.14), transparent 60%),
+        radial-gradient(700px 420px at 85% 110%, rgba(184, 135, 45, 0.10), transparent 65%),
+        linear-gradient(180deg, #fbf8f2 0%, #f3ede1 100%);
+    }
+
+    body.access-granted .access-gate {
+      display: none;
+    }
+
+    .access-panel {
+      width: min(440px, 100%);
+      padding: 44px 40px 36px;
+      border: 1px solid rgba(184, 135, 45, 0.22);
+      border-radius: 18px;
+      background: #ffffff;
+      box-shadow:
+        0 24px 60px rgba(60, 42, 8, 0.16),
+        0 2px 8px rgba(60, 42, 8, 0.06);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .access-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 5px;
+      background: linear-gradient(90deg, #7b5516, #d8ab52 35%, #f1d693 50%, #d8ab52 65%, #7b5516);
+    }
+
+    .access-logo {
+      width: min(260px, 80%);
+      height: auto;
+      display: block;
+      margin: 6px auto 18px;
+    }
+
+    .access-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 18px;
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+    }
+
+    .access-divider::before,
+    .access-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(184, 135, 45, 0.45));
+    }
+
+    .access-divider::after {
+      background: linear-gradient(90deg, rgba(184, 135, 45, 0.45), transparent);
+    }
+
+    .access-copy {
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .access-field {
+      text-align: left;
+    }
+
+    .access-field label {
+      color: #4b5263;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .access-field input {
+      text-align: center;
+      font-size: 18px;
+      letter-spacing: 0.25em;
+      border-color: rgba(184, 135, 45, 0.35);
+    }
+
+    .access-field input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(184, 135, 45, 0.18);
+    }
+
+    .access-btn {
+      width: 100%;
+      min-height: 50px;
+      margin-top: 16px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #c9963a, #a87a24);
+      color: #fffaf0;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.06em;
+      border: 1px solid #8d6519;
+      box-shadow: 0 10px 22px rgba(140, 100, 25, 0.28);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+    }
+
+    .access-btn:hover {
+      filter: brightness(1.06);
+      box-shadow: 0 12px 26px rgba(140, 100, 25, 0.34);
+    }
+
+    .access-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 6px 14px rgba(140, 100, 25, 0.26);
+    }
+
+    .access-error {
+      min-height: 22px;
+      margin: 14px 0 0;
+      color: var(--red);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .access-panel.access-shake {
+      animation: access-shake 0.4s ease;
+    }
+
+    @keyframes access-shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+
+    .access-foot {
+      margin: 22px 0 0;
+      color: #9aa1ae;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 480px) {
+      .access-panel {
+        padding: 34px 24px 28px;
+      }
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px clamp(16px, 3vw, 34px);
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 220px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: #172033;
+      color: #f5d080;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .brand-title {
+      font-size: 17px;
+      line-height: 1.1;
+      font-weight: 750;
+      margin: 0;
+    }
+
+    .brand-subtitle {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 16px;
+      border-radius: 8px;
+      background: var(--soft);
+      color: var(--ink);
+      font-weight: 800;
+      border: 1px solid transparent;
+    }
+
+    .btn:hover {
+      border-color: var(--line);
+      background: #ffffff;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #075f4f;
+      border-color: #075f4f;
+    }
+
+    .btn-icon {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      border-radius: 8px;
+    }
+
+    .btn-danger {
+      background: #fff1ef;
+      color: var(--red);
+    }
+
+    .payment-error {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border: 1px solid #efb8b2;
+      border-radius: 8px;
+      background: #fff1ef;
+      color: var(--red);
+      font-size: 13px;
+      font-weight: 750;
+      line-height: 1.4;
+    }
+
+    .icon {
+      width: 19px;
+      height: 19px;
+      flex: 0 0 19px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .content {
+      width: min(1520px, 100%);
+      margin: 0 auto;
+      padding: 22px clamp(14px, 3vw, 34px) 34px;
+      display: grid;
+      grid-template-columns: minmax(470px, 0.98fr) minmax(420px, 1.02fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .editor,
+    .preview-shell {
+      min-width: 0;
+    }
+
+    .editor {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .section {
+      padding: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section:last-child {
+      border-bottom: 0;
+    }
+
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .mode-tab {
+      min-height: 54px;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .mode-tab.is-active {
+      background: var(--green);
+      color: #ffffff;
+      box-shadow: 0 8px 18px rgba(8, 117, 95, 0.18);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      min-width: 0;
+    }
+
+    .field-wide {
+      grid-column: 1 / -1;
+    }
+
+    .fixed-details {
+      display: grid;
+      gap: 9px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+
+    .fixed-row {
+      display: grid;
+      grid-template-columns: 118px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      line-height: 1.45;
+    }
+
+    .fixed-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .fixed-value {
+      font-weight: 750;
+      overflow-wrap: anywhere;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #334155;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      min-height: 48px;
+      padding: 11px 12px;
+      border-radius: 8px;
+      border: 1px solid #cfd7e4;
+      background: #ffffff;
+      color: var(--ink);
+      font-size: 16px;
+      outline: none;
+    }
+
+    input[readonly] {
+      background: #f1f5f9;
+      color: #475569;
+      cursor: default;
+    }
+
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 89, 168, 0.13);
+    }
+
+    .items-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .entry-table {
+      min-width: 1060px;
+      background: #ffffff;
+    }
+
+    .old-gold-entry-table {
+      min-width: 720px;
+    }
+
+    .history-table {
+      min-width: 980px;
+    }
+
+    .history-link {
+      padding: 0;
+      background: transparent;
+      color: var(--blue);
+      font-weight: 850;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      border-radius: 0;
+    }
+
+    .history-link:hover {
+      color: var(--gold-dark);
+    }
+
+    .type-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 58px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #eef3f8;
+      color: #334155;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .type-pill-chit {
+      background: #fff5df;
+      color: var(--gold-dark);
+    }
+
+    .estimate-action-popover {
+      position: fixed;
+      z-index: 30;
+      width: min(220px, calc(100vw - 28px));
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 18px 38px rgba(23, 32, 51, 0.18);
+    }
+
+    .estimate-action-popover button {
+      width: 100%;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--ink);
+      font-weight: 800;
+      text-align: left;
+    }
+
+    .estimate-action-popover button:hover {
+      background: var(--soft);
+    }
+
+    .estimate-action-popover .delete-action {
+      color: var(--red);
+    }
+
+    .summary-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(15, 23, 42, 0.36);
+    }
+
+    .summary-modal {
+      width: min(390px, 100%);
+      padding: 22px;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 22px 50px rgba(23, 32, 51, 0.22);
+    }
+
+    .summary-modal h3 {
+      margin: 0 0 14px;
+      font-size: 20px;
+    }
+
+    .summary-modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      padding: 12px 10px;
+      color: #475569;
+      background: #f8fafc;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    td {
+      padding: 10px 8px;
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .entry-table input {
+      min-height: 44px;
+      padding: 9px 10px;
+      border-radius: 6px;
+    }
+
+    .item-name-cell {
+      width: 220px;
+    }
+
+    .number-cell {
+      width: 130px;
+    }
+
+    .purity-cell {
+      width: 96px;
+    }
+
+    .amount-cell {
+      width: 160px;
+      text-align: right;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .action-cell {
+      width: 52px;
+      text-align: center;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fbfdff;
+    }
+
+    .metric-strong {
+      border-color: rgba(8, 117, 95, 0.35);
+      background: #f0fdfa;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-size: 20px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .payment-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .history-empty {
+      color: var(--muted);
+      padding: 14px 0 0;
+      line-height: 1.5;
+    }
+
+    .preview-shell {
+      position: sticky;
+      top: 82px;
+    }
+
+    .invoice-preview {
+      position: relative;
+      background: #ffffff;
+      color: #111827;
+      border: 1px solid #d8dde6;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .invoice-pad {
+      position: relative;
+      padding: clamp(22px, 4vw, 38px);
+      overflow: hidden;
+    }
+
+    .invoice-head,
+    .party-row,
+    .invoice-table,
+    .old-gold-print,
+    .total-area {
+      position: relative;
+      z-index: 1;
+    }
+
+    .invoice-head {
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 18px;
+      align-items: start;
+      padding-bottom: 18px;
+      border-bottom: 3px solid #172033;
+    }
+
+    .shop-block {
+      display: grid;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .invoice-header-art {
+      display: block;
+      width: min(100%, 330px);
+      height: auto;
+      object-fit: contain;
+    }
+
+    .shop-name {
+      margin: 0 0 7px;
+      font-size: clamp(24px, 4vw, 34px);
+      line-height: 1.05;
+      font-weight: 900;
+      color: #172033;
+      overflow-wrap: anywhere;
+    }
+
+    .shop-detail,
+    .customer-detail,
+    .invoice-note,
+    .terms {
+      color: #4b5563;
+      line-height: 1.45;
+      white-space: pre-line;
+    }
+
+    .estimate-box {
+      justify-self: end;
+      text-align: right;
+      min-width: 210px;
+    }
+
+    .estimate-label {
+      display: inline-flex;
+      padding: 7px 10px;
+      border-radius: 6px;
+      background: #fff5df;
+      color: var(--gold-dark);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .estimate-no {
+      margin: 12px 0 4px;
+      font-size: 16px;
+      font-weight: 850;
+    }
+
+    .invoice-meta {
+      color: #4b5563;
+      line-height: 1.55;
+      font-size: 13px;
+    }
+
+    .party-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      padding: 18px 0;
+      border-bottom: 1px solid #d8dde6;
+    }
+
+    .party-title {
+      margin: 0 0 7px;
+      color: #172033;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .invoice-table {
+      margin-top: 18px;
+      font-size: 12px;
+    }
+
+    .old-gold-print {
+      margin-top: 18px;
+    }
+
+    .old-gold-print[hidden] {
+      display: none;
+    }
+
+    .invoice-table th {
+      background: #172033;
+      color: #ffffff;
+      border-bottom: 0;
+      padding: 10px 8px;
+      vertical-align: bottom;
+    }
+
+    .invoice-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+
+    .invoice-table .right,
+    .right {
+      text-align: right;
+    }
+
+    .muted {
+      color: #6b7280;
+    }
+
+    .total-area {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 18px;
+    }
+
+    .total-table {
+      width: min(100%, 380px);
+    }
+
+    .amount-words-row td {
+      padding-top: 10px;
+      border-bottom: 0;
+      color: #374151;
+      line-height: 1.5;
+      text-align: left !important;
+      font-weight: 700 !important;
+    }
+
+    .total-table td {
+      padding: 8px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .total-table td:last-child {
+      text-align: right;
+      font-weight: 800;
+    }
+
+    .grand-row td {
+      padding-top: 13px;
+      border-bottom: 0;
+      color: #172033;
+      font-size: 18px;
+      font-weight: 950;
+    }
+
+    .terms {
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid #d8dde6;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .empty-line {
+      color: #9ca3af;
+      font-style: italic;
+    }
+
+    @media (max-width: 1080px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-shell {
+        position: static;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .toolbar {
+        justify-content: flex-start;
+        width: 100%;
+      }
+
+      .grid,
+      .summary-grid,
+      .fixed-row,
+      .shop-block,
+      .invoice-head,
+      .party-row {
+        grid-template-columns: 1fr;
+      }
+
+      .total-area {
+        justify-content: stretch;
+      }
+
+      .total-table {
+        width: 100%;
+      }
+
+      .estimate-box {
+        justify-self: start;
+        text-align: left;
+      }
+
+      .invoice-header-art {
+        width: min(100%, 285px);
+      }
+
+      .btn {
+        flex: 1 1 140px;
+      }
+    }
+
+    @page {
+      size: A5 portrait;
+      margin: 9mm;
+    }
+
+    @media print {
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff;
+        overflow: visible !important;
+      }
+
+      body {
+        position: static;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .topbar,
+      .editor {
+        display: none !important;
+      }
+
+      .app,
+      .content,
+      .preview-shell,
+      .invoice-preview {
+        display: block;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        box-shadow: none;
+        border-radius: 0;
+        box-sizing: border-box;
+        overflow: visible;
+      }
+
+      .app {
+        padding: 2mm;
+        border: 0.25mm solid #9ca3af;
+        -webkit-box-decoration-break: clone;
+        box-decoration-break: clone;
+      }
+
+      .invoice-pad {
+        width: 100%;
+        padding: 2mm;
+        box-sizing: border-box;
+        overflow: visible;
+      }
+
+      .invoice-header-art {
+        width: 46mm;
+        max-width: 100%;
+      }
+
+      .invoice-head {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 2.5mm;
+        padding-bottom: 2.5mm;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .invoice-head > *,
+      .shop-block,
+      .estimate-box {
+        min-width: 0;
+      }
+
+      .shop-block {
+        gap: 1.5mm;
+      }
+
+      .shop-detail,
+      .customer-detail,
+      .invoice-meta,
+      .terms {
+        font-size: 9.5px;
+        line-height: 1.35;
+      }
+
+      .estimate-box {
+        width: 34mm;
+        min-width: 30mm;
+        max-width: 34mm;
+      }
+
+      .estimate-label {
+        padding: 5px 7px;
+        font-size: 9.5px;
+      }
+
+      .estimate-no {
+        margin: 8px 0 3px;
+        font-size: 12px;
+      }
+
+      .party-row {
+        padding: 2.5mm 0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .party-title {
+        font-size: 10px;
+      }
+
+      .invoice-table {
+        width: 100%;
+        max-width: 100%;
+        margin: 2.5mm 0 0;
+        font-size: 9.5px;
+        table-layout: fixed;
+        break-inside: auto;
+        page-break-inside: auto;
+      }
+
+      .invoice-table thead {
+        display: table-header-group;
+      }
+
+      .invoice-table tbody {
+        display: table-row-group;
+      }
+
+      .invoice-table th,
+      .invoice-table td {
+        padding: 1.4mm 0.8mm;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+      }
+
+      .invoice-table th:first-child,
+      .invoice-table td:first-child {
+        width: 5% !important;
+      }
+
+      #newGoldPrintTable th:nth-child(2),
+      #newGoldPrintTable td:nth-child(2) {
+        width: 27%;
+      }
+
+      #newGoldPrintTable th:nth-child(3),
+      #newGoldPrintTable td:nth-child(3) {
+        width: 12%;
+      }
+
+      #newGoldPrintTable th:nth-child(4),
+      #newGoldPrintTable td:nth-child(4) {
+        width: 13%;
+      }
+
+      #newGoldPrintTable th:nth-child(5),
+      #newGoldPrintTable td:nth-child(5) {
+        width: 10%;
+      }
+
+      #newGoldPrintTable th:nth-child(6),
+      #newGoldPrintTable td:nth-child(6) {
+        width: 15%;
+      }
+
+      #newGoldPrintTable th:nth-child(7),
+      #newGoldPrintTable td:nth-child(7) {
+        width: 18%;
+      }
+
+      #oldGoldPrintTable th:nth-child(2),
+      #oldGoldPrintTable td:nth-child(2) {
+        width: 20%;
+      }
+
+      #oldGoldPrintTable th:nth-child(3),
+      #oldGoldPrintTable td:nth-child(3) {
+        width: 18%;
+      }
+
+      #oldGoldPrintTable th:nth-child(4),
+      #oldGoldPrintTable td:nth-child(4) {
+        width: 25%;
+      }
+
+      #oldGoldPrintTable th:nth-child(5),
+      #oldGoldPrintTable td:nth-child(5) {
+        width: 32%;
+      }
+
+      .old-gold-print {
+        margin-top: 2.5mm;
+        break-inside: auto;
+        page-break-inside: auto;
+      }
+
+      .old-gold-print > .party-title {
+        break-after: avoid;
+        page-break-after: avoid;
+      }
+
+      .total-area {
+        margin-top: 2.5mm;
+        break-inside: avoid;
+        break-after: avoid;
+        page-break-inside: avoid;
+        page-break-after: avoid;
+      }
+
+      .total-table {
+        width: min(100%, 88mm);
+        max-width: 100%;
+        font-size: 9.5px;
+      }
+
+      .total-table td {
+        padding: 4px 0;
+      }
+
+      .grand-row td {
+        padding-top: 8px;
+        font-size: 14px;
+      }
+
+      .amount-words-row td {
+        padding-top: 7px;
+        font-size: 9.5px;
+      }
+
+      .terms {
+        margin-top: 2.5mm;
+        padding-top: 2mm;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      body.print-density-compact .invoice-header-art {
+        width: 43mm;
+      }
+
+      body.print-density-compact .invoice-head {
+        gap: 8px;
+        padding-bottom: 8px;
+      }
+
+      body.print-density-compact .party-row {
+        padding: 7px 0;
+      }
+
+      body.print-density-compact .invoice-table {
+        margin-top: 7px;
+        font-size: 9.5px;
+      }
+
+      body.print-density-compact .invoice-table th,
+      body.print-density-compact .invoice-table td {
+        padding: 4px 3px;
+      }
+
+      body.print-density-compact .total-area,
+      body.print-density-compact .terms,
+      body.print-density-compact .old-gold-print {
+        margin-top: 7px;
+      }
+
+      body.print-density-dense .invoice-header-art {
+        width: 40mm;
+      }
+
+      body.print-density-dense .invoice-head {
+        gap: 6px;
+        padding-bottom: 6px;
+      }
+
+      body.print-density-dense .shop-detail,
+      body.print-density-dense .customer-detail,
+      body.print-density-dense .invoice-meta,
+      body.print-density-dense .terms {
+        font-size: 8.5px;
+        line-height: 1.25;
+      }
+
+      body.print-density-dense .estimate-label {
+        padding: 4px 6px;
+        font-size: 8.5px;
+      }
+
+      body.print-density-dense .estimate-no {
+        margin-top: 5px;
+        font-size: 10.5px;
+      }
+
+      body.print-density-dense .party-row {
+        padding: 5px 0;
+      }
+
+      body.print-density-dense .invoice-table {
+        margin-top: 5px;
+        font-size: 8.5px;
+      }
+
+      body.print-density-dense .invoice-table th,
+      body.print-density-dense .invoice-table td {
+        padding: 3px 2px;
+      }
+
+      body.print-density-dense .total-area,
+      body.print-density-dense .terms,
+      body.print-density-dense .old-gold-print {
+        margin-top: 5px;
+      }
+
+      body.print-density-dense .total-table {
+        font-size: 9px;
+      }
+
+      body.print-density-dense .total-table td {
+        padding: 3px 0;
+      }
+
+      .access-gate {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="access-gate" aria-label="Access code">
+    <form class="access-panel" id="accessForm">
+      <img class="access-logo" src="outputs/surana-header-black.png" alt="Surana Jewellers">
+      <div class="access-divider" aria-hidden="true">Private Access</div>
+      <p class="access-copy">This estimate app is reserved for authorised staff.<br>Enter your access code to continue.</p>
+      <div class="access-field">
+        <label for="accessCode">Access code</label>
+        <input id="accessCode" type="password" autocomplete="current-password" placeholder="••••••••" required>
+      </div>
+      <button class="access-btn" type="submit">Unlock</button>
+      <div class="access-error" id="accessError" role="alert"></div>
+      <p class="access-foot">Surana Jewellers &middot; Estimate Suite</p>
+    </form>
+  </section>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">G</div>
+        <div>
+          <h1 class="brand-title">Surana Jewellers</h1>
+          <p class="brand-subtitle">Estimate Copy</p>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="btn" id="newEstimateBtn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5z"></path><path d="M14 2v6h6"></path><path d="M12 18v-6"></path><path d="M9 15h6"></path></svg>
+          New
+        </button>
+        <button class="btn btn-danger" id="clearAllEstimatesBtn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>
+          Clear All
+        </button>
+        <button class="btn btn-primary" id="printBtn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+          Print
+        </button>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="editor" aria-label="Estimate form">
+        <section class="section">
+          <div class="mode-tabs" role="tablist" aria-label="Estimate type">
+            <button class="mode-tab" id="normalEstimateMode" type="button" role="tab" data-estimate-type="normal">Normal Estimate</button>
+            <button class="mode-tab" id="chitEstimateMode" type="button" role="tab" data-estimate-type="chit">Chit Estimate</button>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">Customer</h2>
+          </div>
+          <div class="grid">
+            <div class="field">
+              <label for="estimateNo">Estimate number</label>
+              <input id="estimateNo" readonly>
+            </div>
+            <div class="field">
+              <label for="estimateDate">Date</label>
+              <input id="estimateDate" readonly>
+            </div>
+            <div class="field">
+              <label for="customerName">Customer name</label>
+              <input id="customerName" autocomplete="name">
+            </div>
+            <div class="field">
+              <label for="customerPhone">Customer phone</label>
+              <input id="customerPhone" autocomplete="tel">
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">New Gold</h2>
+            <button class="btn" id="addItemBtn" type="button">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+              Add new gold
+            </button>
+          </div>
+          <div class="items-wrap">
+            <table class="entry-table">
+              <thead>
+                <tr>
+                  <th class="item-name-cell">Item name</th>
+                  <th class="number-cell">Net wt</th>
+                  <th class="purity-cell">Purity</th>
+                  <th class="number-cell">Rate</th>
+                  <th class="amount-cell">Final amount</th>
+                  <th class="number-cell">VA %</th>
+                  <th class="action-cell"></th>
+                </tr>
+              </thead>
+              <tbody id="itemsBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">Old Gold</h2>
+            <button class="btn" id="addOldGoldBtn" type="button">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+              Add old gold
+            </button>
+          </div>
+          <div class="items-wrap">
+            <table class="entry-table old-gold-entry-table">
+              <thead>
+                <tr>
+                  <th class="number-cell">Weight</th>
+                  <th class="number-cell">Purity %</th>
+                  <th class="number-cell">Rate</th>
+                  <th class="amount-cell">Calculated value</th>
+                  <th class="amount-cell">Final value</th>
+                  <th class="action-cell"></th>
+                </tr>
+              </thead>
+              <tbody id="oldGoldBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">Totals</h2>
+          </div>
+          <div class="summary-grid">
+            <div class="metric">
+              <div class="metric-label">Net weight</div>
+              <div class="metric-value" id="netWeightMetric">0.000 g</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">VA weight</div>
+              <div class="metric-value" id="vaWeightMetric">0.000 g</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">New item total</div>
+              <div class="metric-value" id="grandTotalMetric">Rs. 0.00</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Old gold</div>
+              <div class="metric-value" id="oldGoldMetric">Rs. 0.00</div>
+            </div>
+            <div class="metric metric-strong">
+              <div class="metric-label">Net payable</div>
+              <div class="metric-value" id="netPayableMetric">Rs. 0.00</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">Payment</h2>
+          </div>
+          <div class="payment-grid">
+            <div class="field">
+              <label for="paymentCash">Cash</label>
+              <input id="paymentCash" inputmode="decimal" placeholder="Amount">
+            </div>
+            <div class="field">
+              <label for="paymentCard">Card</label>
+              <input id="paymentCard" inputmode="decimal" placeholder="Amount">
+            </div>
+            <div class="field">
+              <label for="paymentUpi">UPI</label>
+              <input id="paymentUpi" inputmode="decimal" placeholder="Amount">
+            </div>
+          </div>
+          <div class="payment-grid" style="margin-top: 12px;" data-chit-only hidden>
+            <div class="field">
+              <label for="chitAmount">Chit Amount</label>
+              <input id="chitAmount" inputmode="decimal" placeholder="Amount">
+            </div>
+            <div class="field">
+              <label for="chitBonus">Chit Bonus</label>
+              <input id="chitBonus" inputmode="decimal" placeholder="Amount">
+            </div>
+            <div class="field">
+              <label for="chitWeight">Chit Weight</label>
+              <input id="chitWeight" inputmode="decimal" placeholder="Grams">
+            </div>
+          </div>
+          <div class="summary-grid" style="margin-top: 12px;">
+            <div class="metric metric-strong">
+              <div class="metric-label">Total paid</div>
+              <div class="metric-value" id="totalPaidMetric">Rs. 0.00</div>
+            </div>
+          </div>
+          <div class="payment-error" id="paymentAllocationError" role="alert" hidden></div>
+        </section>
+
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">Saved Estimates</h2>
+            <button class="btn" id="downloadDaySummaryBtn" type="button">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>
+              Day Summary
+            </button>
+            <button class="btn" id="downloadMonthSummaryBtn" type="button">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>
+              Month Summary
+            </button>
+          </div>
+          <div class="items-wrap">
+            <table class="entry-table history-table">
+              <thead>
+                <tr>
+                  <th>Estimate</th>
+                  <th>Type</th>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th class="right">New wt</th>
+                  <th class="right">Old wt</th>
+                  <th class="right">Old value</th>
+                  <th class="right">Net payable</th>
+                  <th class="right">Paid</th>
+                </tr>
+              </thead>
+              <tbody id="savedEstimatesBody"></tbody>
+            </table>
+          </div>
+          <div class="history-empty" id="savedEstimatesEmpty">No printed estimates saved yet.</div>
+        </section>
+      </div>
+
+      <aside class="preview-shell" aria-label="Invoice preview">
+        <article class="invoice-preview" id="invoicePreview">
+          <div class="invoice-pad">
+            <header class="invoice-head">
+              <div class="shop-block">
+                <img class="invoice-header-art" src="surana-header-black.png" alt="Surana Jewellers">
+                <div>
+                  <div class="shop-detail" id="previewShopAddress">Address</div>
+                  <div class="shop-detail" id="previewShopPhone">Phone</div>
+                  <div class="shop-detail" id="previewShopGstn">GSTN</div>
+                </div>
+              </div>
+              <div class="estimate-box">
+                <span class="estimate-label">Estimate Copy</span>
+                <div class="estimate-no" id="previewEstimateNo">EST-0001</div>
+                <div class="invoice-meta" id="previewEstimateDate">Date</div>
+              </div>
+            </header>
+
+            <section class="party-row">
+              <div>
+                <h3 class="party-title">Customer</h3>
+                <div class="customer-detail" id="previewCustomer">Walk-in customer</div>
+              </div>
+            </section>
+
+            <table class="invoice-table" id="newGoldPrintTable">
+              <thead>
+                <tr>
+                  <th style="width: 32px;">#</th>
+                  <th>Item</th>
+                  <th>Purity</th>
+                  <th class="right">NET WT</th>
+                  <th class="right">VA %</th>
+                  <th class="right">RATE</th>
+                  <th class="right">TOTAL AMOUNT</th>
+                </tr>
+              </thead>
+              <tbody id="previewItems"></tbody>
+            </table>
+
+            <section class="old-gold-print" id="oldGoldPrintSection" hidden>
+              <h3 class="party-title">Old Gold</h3>
+              <table class="invoice-table" id="oldGoldPrintTable">
+                <thead>
+                  <tr>
+                    <th style="width: 32px;">#</th>
+                    <th class="right">Weight</th>
+                    <th class="right">Purity %</th>
+                    <th class="right">Rate</th>
+                    <th class="right">Value</th>
+                  </tr>
+                </thead>
+                <tbody id="previewOldGold"></tbody>
+              </table>
+            </section>
+
+            <section class="total-area">
+              <table class="total-table">
+                <tbody>
+                  <tr>
+                    <td>Net weight</td>
+                    <td id="summaryNetWeight">0.000 g</td>
+                  </tr>
+                  <tr>
+                    <td>VA weight</td>
+                    <td id="summaryVaWeight">0.000 g</td>
+                  </tr>
+                  <tr>
+                    <td>Taxable value</td>
+                    <td id="summaryTaxableValue">Rs. 0.00</td>
+                  </tr>
+                  <tr>
+                    <td>CGST @ 1.5%</td>
+                    <td id="summaryCgst">Rs. 0.00</td>
+                  </tr>
+                  <tr>
+                    <td>SGST @ 1.5%</td>
+                    <td id="summarySgst">Rs. 0.00</td>
+                  </tr>
+                  <tr>
+                    <td>New item total incl. GST</td>
+                    <td id="summaryGrandTotal">Rs. 0.00</td>
+                  </tr>
+                  <tr id="summaryOldGoldRow">
+                    <td>Old gold deduction</td>
+                    <td id="summaryOldGoldTotal">Rs. 0.00</td>
+                  </tr>
+                  <tr id="summaryChitAmountRow" data-chit-only hidden>
+                    <td>Chit amount deduction</td>
+                    <td id="summaryChitAmount">Rs. 0.00</td>
+                  </tr>
+                  <tr id="summaryChitBonusRow" data-chit-only hidden>
+                    <td>Chit bonus deduction</td>
+                    <td id="summaryChitBonus">Rs. 0.00</td>
+                  </tr>
+                  <tr id="summaryChitWeightRow" data-chit-only hidden>
+                    <td id="summaryChitWeightLabel">Chit weight deduction</td>
+                    <td id="summaryChitWeightValue">Rs. 0.00</td>
+                  </tr>
+                  <tr id="summaryChitWeightGstRow" data-chit-only hidden>
+                    <td>GST on chit weight @ 3%</td>
+                    <td id="summaryChitWeightGst">Rs. 0.00</td>
+                  </tr>
+                  <tr class="grand-row">
+                    <td>Net payable</td>
+                    <td id="summaryNetPayable">Rs. 0.00</td>
+                  </tr>
+                  <tr class="amount-words-row">
+                    <td colspan="2">
+                      Amount in words: <span id="amountWords">Zero Rupees Only</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+            <footer class="terms">
+              *Estimate valid for one day only*
+            </footer>
+          </div>
+        </article>
+      </aside>
+    </main>
+  </div>
+
+  <datalist id="purityOptions">
+    <option value="24K"></option>
+    <option value="916-22K"></option>
+    <option value="20K"></option>
+    <option value="18K"></option>
+    <option value="14K"></option>
+  </datalist>
+
+  <script>
+    const ACCESS_CODE = "__ACCESS_CODE__";
+    const accessSessionKey = "surana-estimate-access-ok-v1";
+    const storageKey = "gold-jewellery-estimate-v1";
+    const NUMBER_RESET_VERSION = "fresh-start-001-v3";
+    const ESTIMATE_PREFIX = "EST-2026/27";
+    const GST_RATE = 0.03;
+    const CGST_RATE = 0.015;
+    const SGST_RATE = 0.015;
+    const businessDetails = {
+      shopName: "Surana Jewellers",
+      gstn: "33ABAPS3285J1ZI",
+      shopPhone: "9884558825 / 9884558826",
+      shopAddress: "118, Rajaji Road, West Tambaram, Chennai - 600045"
+    };
+    const defaultState = {
+      estimateSerial: 1,
+      estimateNo: createEstimateNo(1),
+      estimateDate: todayIso(),
+      estimateType: "normal",
+      customerName: "",
+      customerPhone: "",
+      items: [
+        { name: "", weight: "", purity: "916-22K", rate: "", finalAmount: "" }
+      ],
+      oldGoldItems: [
+        { weight: "", purity: "", rate: "", finalValue: "" }
+      ],
+      payments: { cash: "", card: "", upi: "" },
+      paymentAllocationActive: false,
+      paymentAllocationError: "",
+      chit: { amount: "", bonus: "", weight: "" },
+      printedEstimates: [],
+      numberResetVersion: NUMBER_RESET_VERSION
+    };
+
+    let state = loadState();
+
+    const fields = {
+      estimateNo: document.getElementById("estimateNo"),
+      customerName: document.getElementById("customerName"),
+      customerPhone: document.getElementById("customerPhone")
+    };
+    const estimateDateField = document.getElementById("estimateDate");
+
+    const itemsBody = document.getElementById("itemsBody");
+    const oldGoldBody = document.getElementById("oldGoldBody");
+    const savedEstimatesBody = document.getElementById("savedEstimatesBody");
+    const savedEstimatesEmpty = document.getElementById("savedEstimatesEmpty");
+    const addItemBtn = document.getElementById("addItemBtn");
+    const addOldGoldBtn = document.getElementById("addOldGoldBtn");
+    const downloadDaySummaryBtn = document.getElementById("downloadDaySummaryBtn");
+    const downloadMonthSummaryBtn = document.getElementById("downloadMonthSummaryBtn");
+    const printBtn = document.getElementById("printBtn");
+    const newEstimateBtn = document.getElementById("newEstimateBtn");
+    const clearAllEstimatesBtn = document.getElementById("clearAllEstimatesBtn");
+    const estimateModeButtons = document.querySelectorAll("[data-estimate-type]");
+    const chitOnlyElements = document.querySelectorAll("[data-chit-only]");
+    const paymentFields = {
+      cash: document.getElementById("paymentCash"),
+      card: document.getElementById("paymentCard"),
+      upi: document.getElementById("paymentUpi")
+    };
+    const chitFields = {
+      amount: document.getElementById("chitAmount"),
+      bonus: document.getElementById("chitBonus"),
+      weight: document.getElementById("chitWeight")
+    };
+    let shouldAdvanceAfterPrint = false;
+    let restoreStateAfterReprint = null;
+    let editingEstimateIndex = null;
+    let editingEstimateNo = "";
+
+    initializeAccessGate();
+
+    function startApp() {
+      requestPersistentStorage();
+      bindStaticFields();
+      bindEstimateModeFields();
+      bindPaymentFields();
+      bindChitFields();
+      render();
+
+      addItemBtn.addEventListener("click", () => {
+        state.items.push(createEmptyItem());
+        persistAndRender();
+        const lastInput = itemsBody.querySelector("tr:last-child input");
+        if (lastInput) lastInput.focus();
+      });
+
+      addOldGoldBtn.addEventListener("click", () => {
+        state.oldGoldItems.push(createEmptyOldGoldItem());
+        persistAndRender();
+        const lastInput = oldGoldBody.querySelector("tr:last-child input");
+        if (lastInput) lastInput.focus();
+      });
+
+      printBtn.addEventListener("click", () => {
+        syncEstimateNumber();
+        state.estimateDate = todayIso();
+        if (!validateChitWeight()) return;
+        if (!validatePaymentAllocation()) return;
+        savePrintedEstimate();
+        render();
+        applyPrintPaperSize();
+        shouldAdvanceAfterPrint = true;
+        window.print();
+      });
+
+      downloadDaySummaryBtn.addEventListener("click", () => {
+        showSummaryPeriodPicker("day");
+      });
+
+      downloadMonthSummaryBtn.addEventListener("click", () => {
+        showSummaryPeriodPicker("month");
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!event.target.closest(".estimate-action-popover") && !event.target.closest("[data-estimate-actions]")) {
+          closeEstimateActions();
+        }
+      });
+
+      window.addEventListener("afterprint", () => {
+        clearPrintPaperSize();
+        if (restoreStateAfterReprint) {
+          state = restoreStateAfterReprint;
+          restoreStateAfterReprint = null;
+          persistAndRender();
+          return;
+        }
+        if (!shouldAdvanceAfterPrint) return;
+        shouldAdvanceAfterPrint = false;
+        openNextBlankEstimate();
+      });
+
+      newEstimateBtn.addEventListener("click", () => {
+        editingEstimateIndex = null;
+        editingEstimateNo = "";
+        state = createBlankEstimateState(state.estimateSerial, state.printedEstimates, state.estimateType);
+        persistAndRender();
+      });
+
+      clearAllEstimatesBtn.addEventListener("click", clearAllSavedEstimates);
+    }
+
+    async function initializeAccessGate() {
+      const accessForm = document.getElementById("accessForm");
+      const accessCode = document.getElementById("accessCode");
+      const accessError = document.getElementById("accessError");
+      let appStarted = false;
+      const activeAccessCode = await resolveAccessCode();
+
+      function unlockApp() {
+        if (appStarted) return;
+        appStarted = true;
+        document.body.classList.add("access-granted");
+        sessionStorage.setItem(accessSessionKey, "true");
+        startApp();
+      }
+
+      if (!activeAccessCode) {
+        accessError.textContent = "Access code is not configured. If testing locally, open this folder with a local server so the browser can read .env.";
+      }
+
+      if (activeAccessCode && sessionStorage.getItem(accessSessionKey) === "true") {
+        unlockApp();
+        return;
+      }
+
+      accessForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (!activeAccessCode) {
+          accessError.textContent = "Could not read .env from this browser view. In Terminal run: python3 -m http.server 8000, then open http://localhost:8000";
+          accessCode.focus();
+          return;
+        }
+        if (accessCode.value.trim() === activeAccessCode) {
+          accessError.textContent = "";
+          unlockApp();
+          return;
+        }
+        accessError.textContent = "Incorrect access code.";
+        accessCode.value = "";
+        accessCode.focus();
+        const panel = accessForm.closest(".access-panel") || accessForm;
+        panel.classList.remove("access-shake");
+        void panel.offsetWidth;
+        panel.classList.add("access-shake");
+      });
+    }
+
+    async function resolveAccessCode() {
+      // Built from parts so the deploy workflow's sed replacement
+      // only touches the ACCESS_CODE assignment, not this check.
+      const placeholder = ["__ACCESS", "_CODE__"].join("");
+      if (ACCESS_CODE !== placeholder) {
+        return ACCESS_CODE.trim();
+      }
+      const envText = await readLocalEnv();
+      return parseEnvSecret(envText);
+    }
+
+    async function readLocalEnv() {
+      try {
+        const response = await fetch(".env", { cache: "no-store" });
+        if (response.ok) return response.text();
+      } catch {}
+      return new Promise((resolve) => {
+        try {
+          const request = new XMLHttpRequest();
+          request.open("GET", ".env", true);
+          request.onload = () => resolve(request.status === 0 || request.status === 200 ? request.responseText : "");
+          request.onerror = () => resolve("");
+          request.send();
+        } catch {
+          resolve("");
+        }
+      });
+    }
+
+    function parseEnvSecret(envText) {
+      const match = String(envText || "").match(/^SECRET=(.*)$/m);
+      if (!match) return "";
+      return match[1].trim().replace(/^['"]|['"]$/g, "");
+    }
+
+    function bindStaticFields() {
+      Object.entries(fields).forEach(([key, input]) => {
+        input.addEventListener("input", () => {
+          state[key] = input.value;
+          if (key === "estimateNo") state.estimateSerial = serialFromEstimateNo(input.value) || state.estimateSerial;
+          persistAndRender();
+        });
+      });
+    }
+
+    function bindPaymentFields() {
+      Object.entries(paymentFields).forEach(([key, input]) => {
+        input.addEventListener("input", () => {
+          state.payments[key] = input.value;
+          state.paymentAllocationActive = Object.values(state.payments).some((value) => cleanText(value) !== "");
+          if (!state.paymentAllocationActive) state.paymentAllocationError = "";
+          persistAndRender();
+        });
+      });
+    }
+
+    function bindEstimateModeFields() {
+      estimateModeButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          state.estimateType = button.dataset.estimateType === "chit" ? "chit" : "normal";
+          persistAndRender();
+        });
+      });
+    }
+
+    function bindChitFields() {
+      Object.entries(chitFields).forEach(([key, input]) => {
+        input.addEventListener("input", () => {
+          state.chit[key] = input.value;
+          persistAndRender();
+        });
+      });
+    }
+
+    function render(shouldSave = true, syncDate = true) {
+      if (syncDate) state.estimateDate = todayIso();
+      state.estimateType = normalizeEstimateType(state.estimateType);
+      state.chit = normalizeChit(state.chit);
+      renderEstimateMode();
+      renderStaticFields();
+      renderDateDisplay();
+      renderPaymentFields();
+      renderChitFields();
+      renderItems();
+      renderOldGoldItems();
+      renderPreview();
+      renderSavedEstimates();
+      if (shouldSave) saveState();
+    }
+
+    function renderStaticFields() {
+      Object.entries(fields).forEach(([key, input]) => {
+        if (input.value !== state[key]) input.value = state[key] || "";
+      });
+    }
+
+    function renderDateDisplay() {
+      estimateDateField.value = formatDate(state.estimateDate);
+    }
+
+    function renderPaymentFields() {
+      Object.entries(paymentFields).forEach(([key, input]) => {
+        if (input.value !== state.payments[key]) input.value = state.payments[key] || "";
+      });
+    }
+
+    function renderEstimateMode() {
+      const isChit = isChitEstimate();
+      estimateModeButtons.forEach((button) => {
+        const active = button.dataset.estimateType === state.estimateType;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      chitOnlyElements.forEach((element) => {
+        element.hidden = !isChit;
+      });
+      document.body.classList.toggle("chit-mode", isChit);
+    }
+
+    function renderChitFields() {
+      Object.entries(chitFields).forEach(([key, input]) => {
+        if (input.value !== state.chit[key]) input.value = state.chit[key] || "";
+      });
+    }
+
+    function renderItems() {
+      itemsBody.innerHTML = "";
+
+      state.items.forEach((item, index) => {
+        const row = document.createElement("tr");
+        const calc = calculateItem(item, index);
+        row.innerHTML = `
+          <td class="item-name-cell"><input aria-label="Item name" data-field="name" data-index="${index}" value="${escapeAttribute(item.name)}" placeholder="Ring"></td>
+          <td class="number-cell"><input aria-label="Net weight" data-field="weight" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.weight)}" placeholder="Grams"></td>
+          <td class="purity-cell"><input aria-label="Purity" data-field="purity" data-index="${index}" list="purityOptions" value="${escapeAttribute(item.purity)}" placeholder="916-22K"></td>
+          <td class="number-cell"><input aria-label="Rate" data-field="rate" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.rate)}" placeholder="Rate"></td>
+          <td class="amount-cell"><input aria-label="Final amount" data-field="finalAmount" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.finalAmount)}" placeholder="Amount"></td>
+          <td class="number-cell"><input aria-label="VA percentage" value="${escapeAttribute(formatNumber(calc.va, 2))}" readonly></td>
+          <td class="action-cell">
+            <button class="btn btn-icon btn-danger" type="button" data-remove="${index}" aria-label="Remove item" title="Remove item">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>
+            </button>
+          </td>
+        `;
+        itemsBody.appendChild(row);
+      });
+
+      itemsBody.querySelectorAll("input[data-field]").forEach((input) => {
+        input.addEventListener("input", (event) => {
+          const target = event.target;
+          const index = Number(target.dataset.index);
+          const field = target.dataset.field;
+          state.items[index][field] = target.value;
+          persistAndRender();
+          const next = itemsBody.querySelector(`[data-index="${index}"][data-field="${field}"]`);
+          if (next) {
+            next.focus();
+            next.setSelectionRange(target.selectionStart, target.selectionEnd);
+          }
+        });
+      });
+
+      itemsBody.querySelectorAll("[data-remove]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const index = Number(button.dataset.remove);
+          state.items.splice(index, 1);
+          if (state.items.length === 0) {
+            state.items.push(createEmptyItem());
+          }
+          persistAndRender();
+        });
+      });
+    }
+
+    function renderOldGoldItems() {
+      oldGoldBody.innerHTML = "";
+
+      state.oldGoldItems.forEach((item, index) => {
+        const row = document.createElement("tr");
+        const calc = calculateOldGoldItem(item);
+        row.innerHTML = `
+          <td class="number-cell"><input aria-label="Old gold weight" data-old-gold-field="weight" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.weight)}" placeholder="Grams"></td>
+          <td class="number-cell"><input aria-label="Old gold purity percentage" data-old-gold-field="purity" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.purity)}" placeholder="%"></td>
+          <td class="number-cell"><input aria-label="Old gold rate" data-old-gold-field="rate" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.rate)}" placeholder="Rate"></td>
+          <td class="amount-cell">${formatMoney(calc.calculatedValue)}</td>
+          <td class="amount-cell"><input aria-label="Old gold final value" data-old-gold-field="finalValue" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.finalValue)}" placeholder="Optional"></td>
+          <td class="action-cell">
+            <button class="btn btn-icon btn-danger" type="button" data-remove-old-gold="${index}" aria-label="Remove old gold" title="Remove old gold">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>
+            </button>
+          </td>
+        `;
+        oldGoldBody.appendChild(row);
+      });
+
+      oldGoldBody.querySelectorAll("input[data-old-gold-field]").forEach((input) => {
+        input.addEventListener("input", (event) => {
+          const target = event.target;
+          const index = Number(target.dataset.index);
+          const field = target.dataset.oldGoldField;
+          state.oldGoldItems[index][field] = target.value;
+          persistAndRender();
+          const next = oldGoldBody.querySelector(`[data-index="${index}"][data-old-gold-field="${field}"]`);
+          if (next) {
+            next.focus();
+            next.setSelectionRange(target.selectionStart, target.selectionEnd);
+          }
+        });
+      });
+
+      oldGoldBody.querySelectorAll("[data-remove-old-gold]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const index = Number(button.dataset.removeOldGold);
+          state.oldGoldItems.splice(index, 1);
+          if (state.oldGoldItems.length === 0) {
+            state.oldGoldItems.push(createEmptyOldGoldItem());
+          }
+          persistAndRender();
+        });
+      });
+    }
+
+    function renderPreview() {
+      const totals = calculateTotals();
+      const payments = calculatePayments();
+      const customerParts = [
+        cleanText(state.customerName) || "Walk-in customer",
+        cleanText(state.customerPhone) ? `Phone: ${cleanText(state.customerPhone)}` : ""
+      ].filter(Boolean);
+
+      document.getElementById("previewShopAddress").textContent = businessDetails.shopAddress;
+      document.getElementById("previewShopPhone").textContent = `Phone: ${businessDetails.shopPhone}`;
+      document.getElementById("previewShopGstn").textContent = `GSTN: ${businessDetails.gstn}`;
+      document.querySelector(".estimate-label").textContent = isChitEstimate() ? "Chit Estimate Copy" : "Estimate Copy";
+      document.getElementById("previewEstimateNo").textContent = cleanText(state.estimateNo) || "EST-0001";
+      document.getElementById("previewEstimateDate").textContent = formatDate(state.estimateDate);
+      document.getElementById("previewCustomer").textContent = customerParts.join("\n");
+
+      const previewItems = document.getElementById("previewItems");
+      previewItems.innerHTML = "";
+      const printableItems = state.items.filter((item) => hasItemContent(item));
+      const printableOldGoldItems = state.oldGoldItems.filter((item) => hasOldGoldContent(item));
+
+      if (printableItems.length === 0) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td colspan="7" class="empty-line">No items added</td>`;
+        previewItems.appendChild(row);
+      } else {
+        printableItems.forEach((item, index) => {
+          const itemIndex = state.items.indexOf(item);
+          const calc = calculateItem(item, itemIndex);
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${escapeHtml(cleanText(item.name) || "Gold jewellery")}</td>
+            <td>${escapeHtml(cleanText(item.purity) || "-")}</td>
+            <td class="right">${formatWeight(calc.weight)}</td>
+            <td class="right">${formatPercent(calc.va)}</td>
+            <td class="right">${formatMoney(calc.rate)}</td>
+            <td class="right">${formatMoney(calc.amount)}</td>
+          `;
+          previewItems.appendChild(row);
+        });
+      }
+
+      const oldGoldPrintSection = document.getElementById("oldGoldPrintSection");
+      const previewOldGold = document.getElementById("previewOldGold");
+      previewOldGold.innerHTML = "";
+      oldGoldPrintSection.hidden = totals.oldGoldTotal <= 0;
+
+      printableOldGoldItems.forEach((item, index) => {
+        const calc = calculateOldGoldItem(item);
+        if (calc.value <= 0) return;
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td class="right">${formatWeight(calc.weight)}</td>
+          <td class="right">${formatPercent(calc.purity)}</td>
+          <td class="right">${formatMoney(calc.rate)}</td>
+          <td class="right">${formatMoney(calc.value)}</td>
+        `;
+        previewOldGold.appendChild(row);
+      });
+
+      document.getElementById("netWeightMetric").textContent = formatWeight(totals.netWeight);
+      document.getElementById("vaWeightMetric").textContent = formatWeight(totals.vaWeight);
+      document.getElementById("grandTotalMetric").textContent = formatMoney(totals.grandTotal);
+      document.getElementById("oldGoldMetric").textContent = formatMoney(totals.oldGoldTotal);
+      document.getElementById("netPayableMetric").textContent = formatMoney(totals.netPayable);
+      document.getElementById("totalPaidMetric").textContent = formatMoney(payments.totalPaid);
+      const paymentAllocationError = document.getElementById("paymentAllocationError");
+      paymentAllocationError.textContent = state.paymentAllocationError || "";
+      paymentAllocationError.hidden = !state.paymentAllocationActive || !state.paymentAllocationError;
+      document.getElementById("summaryNetWeight").textContent = formatWeight(totals.netWeight);
+      document.getElementById("summaryVaWeight").textContent = formatWeight(totals.vaWeight);
+      document.getElementById("summaryTaxableValue").textContent = formatMoney(totals.taxableValue);
+      document.getElementById("summaryCgst").textContent = formatMoney(totals.cgst);
+      document.getElementById("summarySgst").textContent = formatMoney(totals.sgst);
+      document.getElementById("summaryGrandTotal").textContent = formatMoney(totals.grandTotal);
+      document.getElementById("summaryOldGoldTotal").textContent = formatMoney(totals.oldGoldTotal);
+      document.getElementById("summaryChitAmount").textContent = formatMoney(totals.chitAmount);
+      document.getElementById("summaryChitBonus").textContent = formatMoney(totals.chitBonus);
+      document.getElementById("summaryChitWeightLabel").textContent = `Chit weight deduction (${formatWeight(totals.chitWeight)})`;
+      document.getElementById("summaryChitWeightValue").textContent = formatMoney(totals.chitWeightValue);
+      document.getElementById("summaryChitWeightGst").textContent = formatMoney(totals.chitWeightGst);
+      document.getElementById("summaryNetPayable").textContent = formatMoney(totals.netPayable);
+      document.getElementById("amountWords").textContent = numberToIndianWords(Math.round(totals.netPayable));
+      renderPrintableDeductionRows(totals);
+    }
+
+    function renderPrintableDeductionRows(totals) {
+      const isChit = isChitEstimate();
+      setRowHidden("summaryOldGoldRow", totals.oldGoldTotal <= 0);
+      setRowHidden("summaryChitAmountRow", !isChit || totals.chitAmount <= 0);
+      setRowHidden("summaryChitBonusRow", !isChit || totals.chitBonus <= 0);
+      setRowHidden("summaryChitWeightRow", !isChit || totals.chitWeightValue <= 0);
+      setRowHidden("summaryChitWeightGstRow", !isChit || totals.chitWeightGst <= 0);
+    }
+
+    function setRowHidden(id, hidden) {
+      const row = document.getElementById(id);
+      if (row) row.hidden = hidden;
+    }
+
+    function renderSavedEstimates() {
+      savedEstimatesBody.innerHTML = "";
+      const records = state.printedEstimates || [];
+      savedEstimatesEmpty.hidden = records.length > 0;
+
+      records.map((record, index) => ({ record, index })).reverse().forEach(({ record, index }) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td><button class="history-link" type="button" data-estimate-actions="${index}" title="Estimate actions">${escapeHtml(record.estimateNo)}</button></td>
+          <td><span class="type-pill ${estimateTypeClass(record.estimateType)}">${escapeHtml(formatEstimateType(record.estimateType))}</span></td>
+          <td>${escapeHtml(record.date)}</td>
+          <td>${escapeHtml(record.customerName || "Walk-in")}</td>
+          <td>${escapeHtml(record.itemNames || "-")}</td>
+          <td class="right">${formatWeight(record.totalNewWeight)}</td>
+          <td class="right">${formatWeight(record.totalOldGoldWeight)}</td>
+          <td class="right">${formatMoney(record.totalOldGoldValue)}</td>
+          <td class="right">${formatMoney(record.netPayable)}</td>
+          <td class="right">${formatMoney(record.totalPaid)}</td>
+        `;
+        savedEstimatesBody.appendChild(row);
+      });
+
+      savedEstimatesBody.querySelectorAll("[data-estimate-actions]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          showEstimateActions(Number(button.dataset.estimateActions), button);
+        });
+      });
+    }
+
+    function showEstimateActions(index, anchor) {
+      closeEstimateActions();
+      const record = state.printedEstimates[index];
+      if (!record) return;
+      const menu = document.createElement("div");
+      menu.className = "estimate-action-popover";
+      menu.innerHTML = `
+        <button type="button" data-action="edit">Edit</button>
+        <button type="button" data-action="reprint">Reprint</button>
+        <button class="delete-action" type="button" data-action="delete">Delete</button>
+      `;
+      document.body.appendChild(menu);
+
+      const rect = anchor.getBoundingClientRect();
+      const top = Math.min(rect.bottom + 8, window.innerHeight - menu.offsetHeight - 12);
+      const left = Math.min(rect.left, window.innerWidth - menu.offsetWidth - 12);
+      menu.style.top = `${Math.max(12, top)}px`;
+      menu.style.left = `${Math.max(12, left)}px`;
+
+      menu.querySelector('[data-action="edit"]').addEventListener("click", () => {
+        closeEstimateActions();
+        editSavedEstimate(index);
+      });
+      menu.querySelector('[data-action="reprint"]').addEventListener("click", () => {
+        closeEstimateActions();
+        reprintSavedEstimate(index);
+      });
+      menu.querySelector('[data-action="delete"]').addEventListener("click", () => {
+        closeEstimateActions();
+        deleteSavedEstimate(index);
+      });
+    }
+
+    function closeEstimateActions() {
+      document.querySelectorAll(".estimate-action-popover").forEach((menu) => menu.remove());
+    }
+
+    function editSavedEstimate(index) {
+      const record = state.printedEstimates[index];
+      if (!record) return;
+      editingEstimateIndex = index;
+      editingEstimateNo = record.estimateNo || "";
+      state = createStateFromPrintedEstimate(record, state);
+      persistAndRender();
+    }
+
+    function reprintSavedEstimate(index) {
+      const record = state.printedEstimates[index];
+      if (!record) return;
+      restoreStateAfterReprint = structuredClone(state);
+      state = createStateFromPrintedEstimate(record, restoreStateAfterReprint);
+      render(false, false);
+      applyPrintPaperSize();
+      window.print();
+    }
+
+    function deleteSavedEstimate(index) {
+      const record = state.printedEstimates[index];
+      if (!record) return;
+      const confirmed = window.confirm(`Delete ${record.estimateNo}? Saved estimates will be renumbered.`);
+      if (!confirmed) return;
+      state.printedEstimates.splice(index, 1);
+      editingEstimateIndex = null;
+      editingEstimateNo = "";
+      renumberSavedEstimates();
+      state = createBlankEstimateState(nextSerialFromSavedEstimates(), state.printedEstimates, state.estimateType);
+      persistAndRender();
+    }
+
+    function clearAllSavedEstimates() {
+      const confirmed = window.confirm("Delete all saved estimates and reset numbering to EST-2026/27-001? This cannot be undone.");
+      if (!confirmed) return;
+      editingEstimateIndex = null;
+      editingEstimateNo = "";
+      restoreStateAfterReprint = null;
+      shouldAdvanceAfterPrint = false;
+      closeEstimateActions();
+      state = createBlankEstimateState(1, [], "normal");
+      persistAndRender();
+    }
+
+    function renumberSavedEstimates() {
+      state.printedEstimates.forEach((record, index) => {
+        record.estimateNo = createEstimateNo(index + 1);
+      });
+    }
+
+    function nextSerialFromSavedEstimates() {
+      return (state.printedEstimates || []).length + 1;
+    }
+
+    function persistAndRender() {
+      if (state.paymentAllocationActive) {
+        state.paymentAllocationError = applyPaymentAllocation();
+      }
+      saveState();
+      render();
+    }
+
+    function saveState() {
+      localStorage.setItem(storageKey, JSON.stringify(state));
+    }
+
+    async function requestPersistentStorage() {
+      if (!navigator.storage || !navigator.storage.persist) return;
+      try {
+        await navigator.storage.persist();
+      } catch {}
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey));
+        if (!saved || typeof saved !== "object") return structuredClone(defaultState);
+        const shouldResetNumber = saved.numberResetVersion !== NUMBER_RESET_VERSION;
+        const printedEstimates = Array.isArray(saved.printedEstimates) ? saved.printedEstimates.map(normalizePrintedEstimate) : [];
+        const estimateSerial = shouldResetNumber ? printedEstimates.length + 1 : Number(saved.estimateSerial) || serialFromEstimateNo(saved.estimateNo) || defaultState.estimateSerial;
+        return {
+          ...structuredClone(defaultState),
+          estimateSerial,
+          estimateNo: createEstimateNo(estimateSerial),
+          estimateDate: todayIso(),
+          estimateType: shouldResetNumber ? "normal" : normalizeEstimateType(saved.estimateType),
+          customerName: shouldResetNumber ? "" : saved.customerName || "",
+          customerPhone: shouldResetNumber ? "" : saved.customerPhone || "",
+          items: !shouldResetNumber && Array.isArray(saved.items) && saved.items.length ? saved.items.map(normalizeItem) : structuredClone(defaultState.items),
+          oldGoldItems: !shouldResetNumber && Array.isArray(saved.oldGoldItems) && saved.oldGoldItems.length ? saved.oldGoldItems.map(normalizeOldGoldItem) : structuredClone(defaultState.oldGoldItems),
+          payments: shouldResetNumber ? normalizePayments(defaultState.payments) : normalizePayments(saved.payments),
+          paymentAllocationActive: !shouldResetNumber && saved.paymentAllocationActive === true,
+          paymentAllocationError: "",
+          chit: shouldResetNumber ? normalizeChit(defaultState.chit) : normalizeChit(saved.chit),
+          printedEstimates,
+          numberResetVersion: NUMBER_RESET_VERSION
+        };
+      } catch {
+        return structuredClone(defaultState);
+      }
+    }
+
+    function createEmptyItem() {
+      return { name: "", weight: "", purity: "916-22K", rate: "", finalAmount: "" };
+    }
+
+    function createEmptyOldGoldItem() {
+      return { weight: "", purity: "", rate: "", finalValue: "" };
+    }
+
+    function createBlankEstimateState(serial, printedEstimates, estimateType = "normal") {
+      return {
+        ...structuredClone(defaultState),
+        estimateSerial: serial,
+        estimateNo: createEstimateNo(serial),
+        estimateDate: todayIso(),
+        estimateType: normalizeEstimateType(estimateType),
+        customerName: "",
+        customerPhone: "",
+        items: [createEmptyItem()],
+        oldGoldItems: [createEmptyOldGoldItem()],
+        payments: { cash: "", card: "", upi: "" },
+        paymentAllocationActive: false,
+        paymentAllocationError: "",
+        chit: { amount: "", bonus: "", weight: "" },
+        printedEstimates,
+        numberResetVersion: NUMBER_RESET_VERSION
+      };
+    }
+
+    function normalizeItem(item) {
+      return {
+        ...createEmptyItem(),
+        ...item,
+        finalAmount: item && Object.prototype.hasOwnProperty.call(item, "finalAmount") ? item.finalAmount : ""
+      };
+    }
+
+    function normalizeOldGoldItem(item) {
+      return {
+        ...createEmptyOldGoldItem(),
+        ...item
+      };
+    }
+
+    function normalizePayments(payments) {
+      return {
+        cash: payments && payments.cash ? payments.cash : "",
+        card: payments && payments.card ? payments.card : "",
+        upi: payments && payments.upi ? payments.upi : ""
+      };
+    }
+
+    function normalizeChit(chit) {
+      return {
+        amount: chit && chit.amount ? chit.amount : "",
+        bonus: chit && chit.bonus ? chit.bonus : "",
+        weight: chit && chit.weight ? chit.weight : ""
+      };
+    }
+
+    function normalizeEstimateType(estimateType) {
+      return estimateType === "chit" ? "chit" : "normal";
+    }
+
+    function formatEstimateType(estimateType) {
+      return normalizeEstimateType(estimateType) === "chit" ? "Chit" : "Normal";
+    }
+
+    function estimateTypeClass(estimateType) {
+      return normalizeEstimateType(estimateType) === "chit" ? "type-pill-chit" : "";
+    }
+
+    function normalizePrintedEstimate(record) {
+      const dateIso = record.dateIso || isoFromDisplayDate(record.date) || "";
+      return {
+        estimateNo: record.estimateNo || "",
+        estimateType: normalizeEstimateType(record.estimateType),
+        date: record.date || "",
+        dateIso,
+        customerName: record.customerName || "",
+        customerPhone: record.customerPhone || "",
+        itemNames: record.itemNames || "",
+        totalNewWeight: toNumber(record.totalNewWeight),
+        newItemTotal: toNumber(record.newItemTotal),
+        totalOldGoldWeight: toNumber(record.totalOldGoldWeight),
+        totalOldGoldValue: toNumber(record.totalOldGoldValue),
+        netPayable: toNumber(record.netPayable),
+        cashPaid: toNumber(record.cashPaid),
+        cardPaid: toNumber(record.cardPaid),
+        upiPaid: toNumber(record.upiPaid),
+        totalPaid: toNumber(record.totalPaid),
+        paymentAllocationActive: record.paymentAllocationActive === true,
+        chitAmount: toNumber(record.chitAmount),
+        chitBonus: toNumber(record.chitBonus),
+        chitWeight: toNumber(record.chitWeight),
+        chitRate: toNumber(record.chitRate),
+        chitWeightValue: toNumber(record.chitWeightValue),
+        chitWeightGst: toNumber(record.chitWeightGst),
+        chitDeductionTotal: toNumber(record.chitDeductionTotal),
+        items: Array.isArray(record.items) ? record.items.map(normalizeItem) : [],
+        oldGoldItems: Array.isArray(record.oldGoldItems) ? record.oldGoldItems.map(normalizeOldGoldItem) : []
+      };
+    }
+
+    function createStateFromPrintedEstimate(record, existingState) {
+      const serial = serialFromEstimateNo(record.estimateNo) || existingState.estimateSerial || 1;
+      return {
+        ...existingState,
+        estimateSerial: serial,
+        estimateNo: record.estimateNo || createEstimateNo(serial),
+        estimateDate: record.dateIso || isoFromDisplayDate(record.date) || todayIso(),
+        estimateType: normalizeEstimateType(record.estimateType),
+        customerName: record.customerName || "",
+        customerPhone: record.customerPhone || "",
+        items: printableItemsFromRecord(record),
+        oldGoldItems: printableOldGoldFromRecord(record),
+        payments: {
+          cash: record.cashPaid ? String(record.cashPaid) : "",
+          card: record.cardPaid ? String(record.cardPaid) : "",
+          upi: record.upiPaid ? String(record.upiPaid) : ""
+        },
+        paymentAllocationActive: record.paymentAllocationActive === true,
+        paymentAllocationError: "",
+        chit: {
+          amount: record.chitAmount ? String(record.chitAmount) : "",
+          bonus: record.chitBonus ? String(record.chitBonus) : "",
+          weight: record.chitWeight ? String(record.chitWeight) : ""
+        },
+        printedEstimates: existingState.printedEstimates,
+        numberResetVersion: NUMBER_RESET_VERSION
+      };
+    }
+
+    function printableItemsFromRecord(record) {
+      if (Array.isArray(record.items) && record.items.length) {
+        return record.items.map(normalizeItem);
+      }
+      return [{
+        ...createEmptyItem(),
+        name: record.itemNames || "Gold jewellery",
+        weight: record.totalNewWeight ? String(record.totalNewWeight) : "",
+        finalAmount: record.newItemTotal ? String(record.newItemTotal) : ""
+      }];
+    }
+
+    function printableOldGoldFromRecord(record) {
+      if (Array.isArray(record.oldGoldItems) && record.oldGoldItems.length) {
+        return record.oldGoldItems.map(normalizeOldGoldItem);
+      }
+      const weight = toNumber(record.totalOldGoldWeight);
+      const value = toNumber(record.totalOldGoldValue);
+      if (!weight && !value) return [createEmptyOldGoldItem()];
+      return [{
+        weight: weight ? String(weight) : "",
+        purity: "100",
+        rate: weight ? String(value / weight) : String(value),
+        finalValue: ""
+      }];
+    }
+
+    function syncEstimateNumber() {
+      const serial = serialFromEstimateNo(state.estimateNo) || state.estimateSerial || 1;
+      state.estimateSerial = serial;
+      state.estimateNo = createEstimateNo(serial);
+      saveState();
+    }
+
+    function savePrintedEstimate() {
+      const record = buildPrintedEstimateRecord();
+      const editIndexByNumber = editingEstimateNo
+        ? state.printedEstimates.findIndex((savedRecord) => savedRecord.estimateNo === editingEstimateNo)
+        : -1;
+      const fallbackEditIndex = editingEstimateIndex !== null && state.printedEstimates[editingEstimateIndex]
+        ? editingEstimateIndex
+        : -1;
+      const editIndex = editIndexByNumber >= 0 ? editIndexByNumber : fallbackEditIndex;
+
+      if (editingEstimateNo && editIndex >= 0) {
+        state.printedEstimates[editIndex] = record;
+      } else if (!editingEstimateNo) {
+        state.printedEstimates.push(record);
+      } else {
+        window.alert("Could not find the estimate being edited. Please choose Edit again from Saved Estimates.");
+      }
+      renumberSavedEstimates();
+      editingEstimateIndex = null;
+      editingEstimateNo = "";
+      saveState();
+    }
+
+    function buildPrintedEstimateRecord() {
+      const totals = calculateTotals();
+      const payments = calculatePayments();
+      const printableItems = state.items.filter((item) => hasItemContent(item));
+      const printableOldGoldItems = state.oldGoldItems.filter((item) => hasOldGoldContent(item));
+      const itemNames = printableItems.map((item) => cleanText(item.name) || "Gold jewellery").join(", ");
+      const totalOldGoldWeight = printableOldGoldItems.reduce((sum, item) => sum + calculateOldGoldItem(item).weight, 0);
+      const savedItems = printableItems.map((item) => ({
+        name: cleanText(item.name),
+        weight: cleanText(item.weight),
+        purity: cleanText(item.purity),
+        rate: cleanText(item.rate),
+        finalAmount: cleanText(item.finalAmount)
+      }));
+      const savedOldGoldItems = printableOldGoldItems.map((item) => ({
+        weight: cleanText(item.weight),
+        purity: cleanText(item.purity),
+        rate: cleanText(item.rate),
+        finalValue: cleanText(item.finalValue)
+      }));
+
+      return {
+        estimateNo: state.estimateNo,
+        estimateType: normalizeEstimateType(state.estimateType),
+        dateIso: state.estimateDate,
+        date: formatDate(state.estimateDate),
+        customerName: cleanText(state.customerName),
+        customerPhone: cleanText(state.customerPhone),
+        itemNames,
+        totalNewWeight: totals.netWeight,
+        newItemTotal: totals.grandTotal,
+        totalOldGoldWeight,
+        totalOldGoldValue: totals.oldGoldTotal,
+        netPayable: totals.netPayable,
+        cashPaid: payments.cash,
+        cardPaid: payments.card,
+        upiPaid: payments.upi,
+        totalPaid: payments.totalPaid,
+        paymentAllocationActive: state.paymentAllocationActive === true,
+        chitAmount: totals.chitAmount,
+        chitBonus: totals.chitBonus,
+        chitWeight: totals.chitWeight,
+        chitRate: totals.chitRate,
+        chitWeightValue: totals.chitWeightValue,
+        chitWeightGst: totals.chitWeightGst,
+        chitDeductionTotal: totals.chitDeductionTotal,
+        items: savedItems,
+        oldGoldItems: savedOldGoldItems
+      };
+    }
+
+    function showSummaryPeriodPicker(mode) {
+      closeSummaryPeriodPicker();
+      const isMonth = mode === "month";
+      const currentValue = isMonth ? todayIso().slice(0, 7) : todayIso();
+      const backdrop = document.createElement("div");
+      backdrop.className = "summary-modal-backdrop";
+      backdrop.innerHTML = `
+        <form class="summary-modal" id="summaryPeriodForm">
+          <h3>${isMonth ? "Month Summary" : "Day Summary"}</h3>
+          <div class="field">
+            <label for="summaryPeriodInput">${isMonth ? "Select month" : "Select date"}</label>
+            <input id="summaryPeriodInput" type="${isMonth ? "month" : "date"}" value="${escapeAttribute(currentValue)}" required>
+          </div>
+          <div class="summary-modal-actions">
+            <button class="btn" type="button" data-summary-cancel>Cancel</button>
+            <button class="btn btn-primary" type="submit">Download</button>
+          </div>
+        </form>
+      `;
+      document.body.appendChild(backdrop);
+      const input = backdrop.querySelector("#summaryPeriodInput");
+      input.focus();
+
+      backdrop.querySelector("[data-summary-cancel]").addEventListener("click", closeSummaryPeriodPicker);
+      backdrop.addEventListener("click", (event) => {
+        if (event.target === backdrop) closeSummaryPeriodPicker();
+      });
+      backdrop.querySelector("#summaryPeriodForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        downloadSummaryFile(mode, input.value);
+        closeSummaryPeriodPicker();
+      });
+    }
+
+    function closeSummaryPeriodPicker() {
+      document.querySelectorAll(".summary-modal-backdrop").forEach((modal) => modal.remove());
+    }
+
+    function downloadSummaryFile(mode, selectedPeriod) {
+      const records = state.printedEstimates || [];
+      const headers = [
+        "Period",
+        "Estimate Type",
+        "Item Name",
+        "Number of Estimates",
+        "Item Weight",
+        "New Item Total",
+        "Total Old Gold Weight",
+        "Total Old Gold Value",
+        "Chit Amount",
+        "Chit Bonus",
+        "Chit Weight",
+        "Chit Weight Value",
+        "GST On Chit Weight",
+        "Net Payable",
+        "Cash Paid",
+        "Card Paid",
+        "UPI Paid",
+        "Total Amount Paid"
+      ];
+      const summaryRows = appendTotalSummaryRow(buildSummaryRows(records, mode, selectedPeriod));
+      const tableRows = summaryRows.map((summary) => [
+        summary.period,
+        summary.estimateType,
+        summary.itemName,
+        toNumber(summary.count),
+        toNumber(summary.itemWeight),
+        toNumber(summary.newItemTotal),
+        toNumber(summary.totalOldGoldWeight),
+        toNumber(summary.totalOldGoldValue),
+        toNumber(summary.chitAmount),
+        toNumber(summary.chitBonus),
+        toNumber(summary.chitWeight),
+        toNumber(summary.chitWeightValue),
+        toNumber(summary.chitWeightGst),
+        toNumber(summary.netPayable),
+        toNumber(summary.cashPaid),
+        toNumber(summary.cardPaid),
+        toNumber(summary.upiPaid),
+        toNumber(summary.totalPaid)
+      ]);
+      const workbook = buildXlsxWorkbook(headers, tableRows);
+      const blob = new Blob([workbook], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = summaryDownloadFilename(mode, selectedPeriod);
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function appendTotalSummaryRow(summaryRows) {
+      const total = summaryRows.reduce((runningTotal, row) => {
+        runningTotal.count += toNumber(row.count);
+        runningTotal.itemWeight += toNumber(row.itemWeight);
+        runningTotal.newItemTotal += toNumber(row.newItemTotal);
+        runningTotal.totalOldGoldWeight += toNumber(row.totalOldGoldWeight);
+        runningTotal.totalOldGoldValue += toNumber(row.totalOldGoldValue);
+        runningTotal.chitAmount += toNumber(row.chitAmount);
+        runningTotal.chitBonus += toNumber(row.chitBonus);
+        runningTotal.chitWeight += toNumber(row.chitWeight);
+        runningTotal.chitWeightValue += toNumber(row.chitWeightValue);
+        runningTotal.chitWeightGst += toNumber(row.chitWeightGst);
+        runningTotal.netPayable += toNumber(row.netPayable);
+        runningTotal.cashPaid += toNumber(row.cashPaid);
+        runningTotal.cardPaid += toNumber(row.cardPaid);
+        runningTotal.upiPaid += toNumber(row.upiPaid);
+        runningTotal.totalPaid += toNumber(row.totalPaid);
+        return runningTotal;
+      }, {
+        period: "TOTAL",
+        estimateType: "",
+        itemName: "",
+        count: 0,
+        itemWeight: 0,
+        newItemTotal: 0,
+        totalOldGoldWeight: 0,
+        totalOldGoldValue: 0,
+        chitAmount: 0,
+        chitBonus: 0,
+        chitWeight: 0,
+        chitWeightValue: 0,
+        chitWeightGst: 0,
+        netPayable: 0,
+        cashPaid: 0,
+        cardPaid: 0,
+        upiPaid: 0,
+        totalPaid: 0
+      });
+      return [...summaryRows, total];
+    }
+
+    function buildXlsxWorkbook(headers, rows) {
+      const allRows = [headers, ...rows];
+      const widths = headers.map((header, columnIndex) => {
+        const maxLength = allRows.reduce((max, row) => {
+          return Math.max(max, String(row[columnIndex] ?? "").length);
+        }, String(header).length);
+        return Math.min(42, Math.max(12, maxLength + 2));
+      });
+      const sheetXml = buildWorksheetXml(allRows, widths);
+      return createZip([
+        { name: "[Content_Types].xml", content: buildContentTypesXml() },
+        { name: "_rels/.rels", content: buildRootRelsXml() },
+        { name: "docProps/app.xml", content: buildAppXml() },
+        { name: "docProps/core.xml", content: buildCoreXml() },
+        { name: "xl/workbook.xml", content: buildWorkbookXml() },
+        { name: "xl/_rels/workbook.xml.rels", content: buildWorkbookRelsXml() },
+        { name: "xl/styles.xml", content: buildStylesXml() },
+        { name: "xl/worksheets/sheet1.xml", content: sheetXml }
+      ]);
+    }
+
+    function buildWorksheetXml(rows, widths) {
+      const columns = widths.map((width, index) => {
+        const column = index + 1;
+        return `<col min="${column}" max="${column}" width="${width}" customWidth="1"/>`;
+      }).join("");
+      const rowXml = rows.map((row, rowIndex) => {
+        const rowNumber = rowIndex + 1;
+        const isHeader = rowIndex === 0;
+        const isTotal = row[0] === "TOTAL";
+        const cells = row.map((value, columnIndex) => {
+          const cellRef = `${columnName(columnIndex + 1)}${rowNumber}`;
+          const style = isHeader ? 1 : isTotal ? 2 : 0;
+          return buildCellXml(cellRef, value, style);
+        }).join("");
+        return `<row r="${rowNumber}">${cells}</row>`;
+      }).join("");
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <cols>${columns}</cols>
+  <sheetData>${rowXml}</sheetData>
+</worksheet>`;
+    }
+
+    function buildCellXml(cellRef, value, style) {
+      if (typeof value === "number" && Number.isFinite(value)) {
+        return `<c r="${cellRef}" s="${style}"><v>${value}</v></c>`;
+      }
+      return `<c r="${cellRef}" s="${style}" t="inlineStr"><is><t>${escapeXml(value)}</t></is></c>`;
+    }
+
+    function columnName(number) {
+      let name = "";
+      while (number > 0) {
+        const remainder = (number - 1) % 26;
+        name = String.fromCharCode(65 + remainder) + name;
+        number = Math.floor((number - 1) / 26);
+      }
+      return name;
+    }
+
+    function buildSummaryRows(records, mode, selectedPeriod) {
+      return records
+        .filter((record) => recordMatchesSummaryPeriod(record, mode, selectedPeriod))
+        .flatMap((record) => summaryRowsForRecord(record, mode));
+    }
+
+    function recordMatchesSummaryPeriod(record, mode, selectedPeriod) {
+      const dateIso = record.dateIso || isoFromDisplayDate(record.date);
+      if (!dateIso || !selectedPeriod) return false;
+      return mode === "month" ? dateIso.slice(0, 7) === selectedPeriod : dateIso === selectedPeriod;
+    }
+
+    function summaryRowsForRecord(record, mode) {
+      const period = summaryPeriod(record, mode);
+      const items = summaryItemsFromRecord(record);
+      return items.map((item, index) => {
+        const isFirstItem = index === 0;
+        return {
+          period,
+          estimateType: isFirstItem ? formatEstimateType(record.estimateType) : "",
+          itemName: item.name,
+          count: isFirstItem ? 1 : 0,
+          itemWeight: item.weight,
+          newItemTotal: item.amount,
+          totalOldGoldWeight: isFirstItem ? toNumber(record.totalOldGoldWeight) : 0,
+          totalOldGoldValue: isFirstItem ? toNumber(record.totalOldGoldValue) : 0,
+          chitAmount: isFirstItem ? toNumber(record.chitAmount) : 0,
+          chitBonus: isFirstItem ? toNumber(record.chitBonus) : 0,
+          chitWeight: isFirstItem ? toNumber(record.chitWeight) : 0,
+          chitWeightValue: isFirstItem ? toNumber(record.chitWeightValue) : 0,
+          chitWeightGst: isFirstItem ? toNumber(record.chitWeightGst) : 0,
+          netPayable: isFirstItem ? toNumber(record.netPayable) : 0,
+          cashPaid: isFirstItem ? toNumber(record.cashPaid) : 0,
+          cardPaid: isFirstItem ? toNumber(record.cardPaid) : 0,
+          upiPaid: isFirstItem ? toNumber(record.upiPaid) : 0,
+          totalPaid: isFirstItem ? toNumber(record.totalPaid) : 0
+        };
+      });
+    }
+
+    function summaryItemsFromRecord(record) {
+      if (Array.isArray(record.items) && record.items.length) {
+        return record.items.map((item) => ({
+          name: cleanText(item.name) || "Gold jewellery",
+          weight: toNumber(item.weight),
+          amount: toNumber(item.finalAmount)
+        }));
+      }
+      return [{
+        name: cleanText(record.itemNames) || "Gold jewellery",
+        weight: toNumber(record.totalNewWeight),
+        amount: toNumber(record.newItemTotal)
+      }];
+    }
+
+    function summaryPeriod(record, mode) {
+      const dateIso = record.dateIso || isoFromDisplayDate(record.date);
+      if (!dateIso) return record.date || "Unknown";
+      return mode === "month" ? dateIso.slice(0, 7) : dateIso;
+    }
+
+    function openNextBlankEstimate() {
+      const nextSerial = nextSerialFromSavedEstimates();
+      state = createBlankEstimateState(nextSerial, state.printedEstimates, state.estimateType);
+      persistAndRender();
+    }
+
+    function applyPrintPaperSize() {
+      clearPrintPaperSize();
+      const rowCount = printableRowCount();
+      const densityClass = rowCount <= 4
+        ? "print-density-regular"
+        : rowCount <= 8
+          ? "print-density-compact"
+          : "print-density-dense";
+      document.body.classList.add("print-a5", densityClass);
+    }
+
+    function clearPrintPaperSize() {
+      document.body.classList.remove(
+        "print-a5",
+        "print-density-regular",
+        "print-density-compact",
+        "print-density-dense"
+      );
+    }
+
+    function printableRowCount() {
+      const itemRows = state.items.filter((item) => hasItemContent(item)).length;
+      const oldGoldRows = state.oldGoldItems.filter((item) => hasOldGoldContent(item)).length;
+      return itemRows + oldGoldRows;
+    }
+
+    function calculateItem(item, itemIndex = -1) {
+      const weight = toNumber(item.weight);
+      const rate = toNumber(item.rate);
+      const amount = toNumber(item.finalAmount);
+      const chitWeight = isChitEstimate() ? chitWeightForItem(itemIndex) : 0;
+      const balanceWeight = Math.max(0, weight - chitWeight);
+      const chitWeightValue = calculateChitWeightValue(chitWeight, rate);
+      const balanceAmount = Math.max(0, amount - chitWeightValue);
+      const baseAmount = balanceWeight * rate * (isChitEstimate() ? 1 + GST_RATE : 1);
+      const va = balanceWeight > 0 && rate > 0 && balanceAmount > 0 ? ((balanceAmount / baseAmount) - 1) * 100 : 0;
+      const vaWeight = balanceWeight * va / 100;
+      const billableWeight = balanceWeight + vaWeight;
+      return { weight, chitWeight, balanceWeight, chitWeightValue, balanceAmount, va, rate, vaWeight, billableWeight, amount };
+    }
+
+    function calculateOldGoldItem(item) {
+      const weight = toNumber(item.weight);
+      const purity = toNumber(item.purity);
+      const rate = toNumber(item.rate);
+      const calculatedValue = weight * purity / 100 * rate;
+      const hasFinalValue = cleanText(item.finalValue) !== "";
+      const finalValue = hasFinalValue ? toNumber(item.finalValue) : 0;
+      const value = hasFinalValue ? finalValue : calculatedValue;
+      return { weight, purity, rate, calculatedValue, finalValue, hasFinalValue, value };
+    }
+
+    function calculateTotals() {
+      const isChit = isChitEstimate();
+      const totals = state.items.reduce((runningTotals, item, index) => {
+        if (!hasItemContent(item)) return runningTotals;
+        const calc = calculateItem(item, index);
+        runningTotals.netWeight += calc.weight;
+        runningTotals.vaWeight += calc.vaWeight;
+        runningTotals.billableWeight += calc.billableWeight;
+        runningTotals.subtotal += calc.amount;
+        runningTotals.grandTotal += calc.amount;
+        return runningTotals;
+      }, {
+        netWeight: 0,
+        vaWeight: 0,
+        billableWeight: 0,
+        subtotal: 0,
+        grandTotal: 0,
+        oldGoldTotal: 0,
+        chitAmount: 0,
+        chitBonus: 0,
+        chitWeight: 0,
+        chitRate: 0,
+        chitWeightValue: 0,
+        chitWeightGst: 0,
+        chitDeductionTotal: 0,
+        netPayable: 0,
+        taxableValue: 0,
+        cgst: 0,
+        sgst: 0
+      });
+      totals.oldGoldTotal = state.oldGoldItems.reduce((sum, item) => {
+        if (!hasOldGoldContent(item)) return sum;
+        return sum + calculateOldGoldItem(item).value;
+      }, 0);
+      if (isChit) {
+        totals.chitAmount = toNumber(state.chit.amount);
+        totals.chitBonus = toNumber(state.chit.bonus);
+        totals.chitWeight = toNumber(state.chit.weight);
+        totals.chitRate = firstNonzeroItemRate();
+        totals.chitWeightValue = state.items.reduce((sum, item, index) => {
+          if (!hasItemContent(item)) return sum;
+          return sum + calculateItem(item, index).chitWeightValue;
+        }, 0);
+        totals.chitWeightGst = totals.chitWeightValue * GST_RATE;
+        totals.chitDeductionTotal = totals.chitAmount + totals.chitBonus + totals.chitWeightValue;
+      }
+      totals.netPayable = totals.grandTotal - totals.oldGoldTotal - totals.chitDeductionTotal + totals.chitWeightGst;
+      return {
+        ...totals,
+        ...calculateInclusiveGst(totals.grandTotal)
+      };
+    }
+
+    function firstNonzeroItemRate() {
+      const item = state.items.find((candidate) => toNumber(candidate.rate) > 0);
+      return item ? toNumber(item.rate) : 0;
+    }
+
+    function chitWeightForItem(itemIndex) {
+      if (!isChitEstimate() || itemIndex < 0) return 0;
+      let remainingChitWeight = toNumber(state.chit.weight);
+      for (let index = 0; index < state.items.length; index += 1) {
+        const itemWeight = toNumber(state.items[index].weight);
+        const allocatedWeight = Math.min(Math.max(remainingChitWeight, 0), itemWeight);
+        if (index === itemIndex) return allocatedWeight;
+        remainingChitWeight -= allocatedWeight;
+      }
+      return 0;
+    }
+
+    function calculateChitWeightValue(weight, rate) {
+      return toNumber(weight) * toNumber(rate);
+    }
+
+    function isChitEstimate() {
+      return normalizeEstimateType(state.estimateType) === "chit";
+    }
+
+    function validateChitWeight() {
+      if (!isChitEstimate()) return true;
+      const totals = calculateTotals();
+      if (totals.chitWeight <= totals.netWeight) return true;
+      window.alert(`Chit weight cannot be more than total net weight.\n\nNet weight: ${formatWeight(totals.netWeight)}\nChit weight: ${formatWeight(totals.chitWeight)}`);
+      return false;
+    }
+
+    function validatePaymentAllocation() {
+      if (!state.paymentAllocationActive) return true;
+      state.paymentAllocationError = applyPaymentAllocation();
+      saveState();
+      if (!state.paymentAllocationError) return true;
+      render(false);
+      window.alert(state.paymentAllocationError);
+      return false;
+    }
+
+    function applyPaymentAllocation() {
+      if (!state.paymentAllocationActive) return "";
+
+      const paymentTotal = calculatePayments().totalPaid;
+      const oldGoldTotal = state.oldGoldItems.reduce((sum, item) => {
+        if (!hasOldGoldContent(item)) return sum;
+        return sum + calculateOldGoldItem(item).value;
+      }, 0);
+
+      if (!isChitEstimate()) {
+        const targetCents = Math.round((paymentTotal + oldGoldTotal) * 100);
+        if (targetCents < 0) return "Payment and old-gold values cannot produce a negative new-gold total.";
+
+        const eligibleItems = state.items
+          .map((item, index) => ({ index, weight: toNumber(item.weight), rate: toNumber(item.rate) }))
+          .filter((entry) => entry.weight > 0 && entry.rate > 0);
+
+        clearIneligiblePaymentAmounts(eligibleItems.map((entry) => entry.index));
+        if (targetCents > 0 && eligibleItems.length === 0) {
+          return "Enter a positive weight and rate for at least one gold item before using payment allocation.";
+        }
+
+        const allocations = distributeCentsByWeight(targetCents, eligibleItems);
+        eligibleItems.forEach(({ index }) => {
+          state.items[index].finalAmount = centsToInput(allocations.get(index) || 0);
+        });
+        return "";
+      }
+
+      const totalNetWeight = state.items.reduce((sum, item) => sum + toNumber(item.weight), 0);
+      const chitWeight = toNumber(state.chit.weight);
+      if (chitWeight > totalNetWeight) {
+        return `Chit weight cannot be more than total net weight. Net weight: ${formatWeight(totalNetWeight)}; chit weight: ${formatWeight(chitWeight)}.`;
+      }
+
+      const itemParts = state.items.map((item, index) => {
+        const weight = toNumber(item.weight);
+        const rate = toNumber(item.rate);
+        const allocatedChitWeight = chitWeightForItem(index);
+        const balanceWeight = Math.max(0, weight - allocatedChitWeight);
+        const fixedValue = allocatedChitWeight * rate;
+        return {
+          index,
+          weight: balanceWeight,
+          rate,
+          fixedValue,
+          fixedCents: Math.round(fixedValue * 100),
+          valid: weight > 0 && rate > 0
+        };
+      });
+
+      const fixedValueTotal = itemParts.reduce((sum, entry) => sum + entry.fixedValue, 0);
+      const fixedCentsTotal = itemParts.reduce((sum, entry) => sum + (entry.valid ? entry.fixedCents : 0), 0);
+      const desiredGrandTotal = paymentTotal
+        + oldGoldTotal
+        + toNumber(state.chit.amount)
+        + toNumber(state.chit.bonus)
+        + fixedValueTotal
+        - fixedValueTotal * GST_RATE;
+      const targetGrandCents = Math.round(desiredGrandTotal * 100);
+      const balanceTargetCents = targetGrandCents - fixedCentsTotal;
+
+      if (balanceTargetCents < 0) {
+        return "Total paid is too low for the fixed chit-weight calculation. Increase payment or reduce the chit values.";
+      }
+
+      const eligibleBalanceItems = itemParts.filter((entry) => entry.valid && entry.weight > 0);
+      clearIneligiblePaymentAmounts(itemParts.filter((entry) => entry.valid).map((entry) => entry.index));
+      if (balanceTargetCents > 0 && eligibleBalanceItems.length === 0) {
+        return "Enter a positive balance weight and rate for at least one gold item before using payment allocation.";
+      }
+
+      const balanceAllocations = distributeCentsByWeight(balanceTargetCents, eligibleBalanceItems);
+      itemParts.forEach((entry) => {
+        if (!entry.valid) return;
+        const finalCents = entry.fixedCents + (balanceAllocations.get(entry.index) || 0);
+        state.items[entry.index].finalAmount = centsToInput(finalCents);
+      });
+      return "";
+    }
+
+    function clearIneligiblePaymentAmounts(eligibleIndexes) {
+      const eligible = new Set(eligibleIndexes);
+      state.items.forEach((item, index) => {
+        if (!eligible.has(index)) item.finalAmount = "";
+      });
+    }
+
+    function distributeCentsByWeight(totalCents, entries) {
+      const allocations = new Map();
+      if (entries.length === 0) return allocations;
+      const totalWeight = entries.reduce((sum, entry) => sum + entry.weight, 0);
+      let remainingCents = totalCents;
+      entries.forEach((entry, index) => {
+        const isLast = index === entries.length - 1;
+        const cents = isLast
+          ? remainingCents
+          : Math.floor(totalCents * entry.weight / totalWeight);
+        allocations.set(entry.index, cents);
+        remainingCents -= cents;
+      });
+      return allocations;
+    }
+
+    function centsToInput(cents) {
+      return (toNumber(cents) / 100).toFixed(2);
+    }
+
+    function calculatePayments() {
+      const cash = toNumber(state.payments.cash);
+      const card = toNumber(state.payments.card);
+      const upi = toNumber(state.payments.upi);
+      return {
+        cash,
+        card,
+        upi,
+        totalPaid: cash + card + upi
+      };
+    }
+
+    function calculateInclusiveGst(grossAmount) {
+      const grandTotal = toNumber(grossAmount);
+      const taxableValue = grandTotal / (1 + GST_RATE);
+      return {
+        taxableValue,
+        cgst: taxableValue * CGST_RATE,
+        sgst: taxableValue * SGST_RATE
+      };
+    }
+
+    function hasItemContent(item) {
+      return ["name", "weight", "rate", "finalAmount"].some((key) => cleanText(item[key]));
+    }
+
+    function hasOldGoldContent(item) {
+      return ["weight", "purity", "rate", "finalValue"].some((key) => cleanText(item[key]));
+    }
+
+    function formatNumber(value, maximumFractionDigits) {
+      return toNumber(value).toLocaleString("en-IN", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits
+      });
+    }
+
+    function toNumber(value) {
+      const parsed = Number(String(value || "").replace(/,/g, "").trim());
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function formatMoney(value) {
+      const number = toNumber(value);
+      const prefix = number < 0 ? "-Rs. " : "Rs. ";
+      return `${prefix}${Math.abs(number).toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`;
+    }
+
+    function summaryDownloadFilename(mode, selectedPeriod) {
+      return mode === "month" ? `${formatDownloadMonthLabel(selectedPeriod)} Summary.xlsx` : `${formatDownloadDateLabel(selectedPeriod)} Summary.xlsx`;
+    }
+
+    function formatDownloadDateLabel(dateIso) {
+      const date = new Date(`${dateIso || todayIso()}T00:00:00`);
+      return date.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "long"
+      });
+    }
+
+    function formatDownloadMonthLabel(monthIso) {
+      const date = new Date(`${monthIso || todayIso().slice(0, 7)}-01T00:00:00`);
+      return date.toLocaleDateString("en-IN", {
+        month: "long"
+      });
+    }
+
+    function escapeXml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function buildContentTypesXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
+  <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+</Types>`;
+    }
+
+    function buildRootRelsXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
+  <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
+</Relationships>`;
+    }
+
+    function buildWorkbookXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets><sheet name="Summary" sheetId="1" r:id="rId1"/></sheets>
+</workbook>`;
+    }
+
+    function buildWorkbookRelsXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`;
+    }
+
+    function buildStylesXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts>
+  <fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF2CC"/><bgColor indexed="64"/></patternFill></fill></fills>
+  <borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"/><right style="thin"/><top style="thin"/><bottom style="thin"/><diagonal/></border></borders>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="1" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0"/></cellXfs>
+  <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`;
+    }
+
+    function buildAppXml() {
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+  <Application>Surana Jewellers Estimate</Application>
+</Properties>`;
+    }
+
+    function buildCoreXml() {
+      const now = new Date().toISOString();
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <dc:creator>Surana Jewellers</dc:creator>
+  <cp:lastModifiedBy>Surana Jewellers</cp:lastModifiedBy>
+  <dcterms:created xsi:type="dcterms:W3CDTF">${now}</dcterms:created>
+  <dcterms:modified xsi:type="dcterms:W3CDTF">${now}</dcterms:modified>
+</cp:coreProperties>`;
+    }
+
+    function createZip(files) {
+      const encoder = new TextEncoder();
+      const fileParts = [];
+      const centralParts = [];
+      let offset = 0;
+
+      files.forEach((file) => {
+        const nameBytes = encoder.encode(file.name);
+        const dataBytes = typeof file.content === "string" ? encoder.encode(file.content) : file.content;
+        const crc = crc32(dataBytes);
+        const localHeader = zipLocalHeader(nameBytes, dataBytes, crc);
+        fileParts.push(localHeader, nameBytes, dataBytes);
+        centralParts.push(zipCentralHeader(nameBytes, dataBytes, crc, offset), nameBytes);
+        offset += localHeader.length + nameBytes.length + dataBytes.length;
+      });
+
+      const centralSize = centralParts.reduce((sum, part) => sum + part.length, 0);
+      const end = zipEndRecord(files.length, centralSize, offset);
+      return combineUint8Arrays([...fileParts, ...centralParts, end]);
+    }
+
+    function zipLocalHeader(nameBytes, dataBytes, crc) {
+      const header = new Uint8Array(30);
+      const view = new DataView(header.buffer);
+      view.setUint32(0, 0x04034b50, true);
+      view.setUint16(4, 20, true);
+      view.setUint16(6, 0, true);
+      view.setUint16(8, 0, true);
+      view.setUint16(10, 0, true);
+      view.setUint16(12, 0, true);
+      view.setUint32(14, crc, true);
+      view.setUint32(18, dataBytes.length, true);
+      view.setUint32(22, dataBytes.length, true);
+      view.setUint16(26, nameBytes.length, true);
+      view.setUint16(28, 0, true);
+      return header;
+    }
+
+    function zipCentralHeader(nameBytes, dataBytes, crc, offset) {
+      const header = new Uint8Array(46);
+      const view = new DataView(header.buffer);
+      view.setUint32(0, 0x02014b50, true);
+      view.setUint16(4, 20, true);
+      view.setUint16(6, 20, true);
+      view.setUint16(8, 0, true);
+      view.setUint16(10, 0, true);
+      view.setUint16(12, 0, true);
+      view.setUint16(14, 0, true);
+      view.setUint32(16, crc, true);
+      view.setUint32(20, dataBytes.length, true);
+      view.setUint32(24, dataBytes.length, true);
+      view.setUint16(28, nameBytes.length, true);
+      view.setUint16(30, 0, true);
+      view.setUint16(32, 0, true);
+      view.setUint16(34, 0, true);
+      view.setUint16(36, 0, true);
+      view.setUint32(38, 0, true);
+      view.setUint32(42, offset, true);
+      return header;
+    }
+
+    function zipEndRecord(fileCount, centralSize, centralOffset) {
+      const record = new Uint8Array(22);
+      const view = new DataView(record.buffer);
+      view.setUint32(0, 0x06054b50, true);
+      view.setUint16(4, 0, true);
+      view.setUint16(6, 0, true);
+      view.setUint16(8, fileCount, true);
+      view.setUint16(10, fileCount, true);
+      view.setUint32(12, centralSize, true);
+      view.setUint32(16, centralOffset, true);
+      view.setUint16(20, 0, true);
+      return record;
+    }
+
+    function combineUint8Arrays(parts) {
+      const totalLength = parts.reduce((sum, part) => sum + part.length, 0);
+      const combined = new Uint8Array(totalLength);
+      let offset = 0;
+      parts.forEach((part) => {
+        combined.set(part, offset);
+        offset += part.length;
+      });
+      return combined;
+    }
+
+    function crc32(bytes) {
+      let crc = 0xffffffff;
+      for (let index = 0; index < bytes.length; index += 1) {
+        crc = (crc >>> 8) ^ crc32Table[(crc ^ bytes[index]) & 0xff];
+      }
+      return (crc ^ 0xffffffff) >>> 0;
+    }
+
+    const crc32Table = (() => {
+      const table = new Uint32Array(256);
+      for (let index = 0; index < 256; index += 1) {
+        let value = index;
+        for (let bit = 0; bit < 8; bit += 1) {
+          value = value & 1 ? 0xedb88320 ^ (value >>> 1) : value >>> 1;
+        }
+        table[index] = value >>> 0;
+      }
+      return table;
+    })();
+
+    function formatWeight(value) {
+      return `${toNumber(value).toLocaleString("en-IN", {
+        minimumFractionDigits: 3,
+        maximumFractionDigits: 3
+      })} g`;
+    }
+
+    function formatPercent(value) {
+      return `${toNumber(value).toLocaleString("en-IN", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      })}%`;
+    }
+
+    function formatDate(value) {
+      if (!value) return "Date";
+      const date = new Date(`${value}T00:00:00`);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+    }
+
+    function todayIso() {
+      const date = new Date();
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function isoFromDisplayDate(value) {
+      if (!value) return "";
+      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function createEstimateNo(serial) {
+      return `${ESTIMATE_PREFIX}-${String(Math.max(1, Number(serial) || 1)).padStart(3, "0")}`;
+    }
+
+    function serialFromEstimateNo(value) {
+      const match = String(value || "").match(/(\d+)$/);
+      if (!match) return 0;
+      return Number(match[1]) || 0;
+    }
+
+    function cleanText(value) {
+      return String(value || "").trim();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replace(/`/g, "&#096;");
+    }
+
+    function numberToIndianWords(value) {
+      const rawNumber = Math.floor(Number(value) || 0);
+      const isNegative = rawNumber < 0;
+      const number = Math.abs(rawNumber);
+      if (number === 0) return "Zero Rupees Only";
+
+      const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+      const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+      function belowHundred(n) {
+        if (n < 20) return ones[n];
+        return `${tens[Math.floor(n / 10)]} ${ones[n % 10]}`.trim();
+      }
+
+      function belowThousand(n) {
+        const hundred = Math.floor(n / 100);
+        const rest = n % 100;
+        if (hundred && rest) return `${ones[hundred]} Hundred ${belowHundred(rest)}`;
+        if (hundred) return `${ones[hundred]} Hundred`;
+        return belowHundred(rest);
+      }
+
+      const parts = [];
+      let remainder = number;
+      const groups = [
+        ["Crore", 10000000],
+        ["Lakh", 100000],
+        ["Thousand", 1000],
+        ["", 1]
+      ];
+
+      groups.forEach(([label, divisor]) => {
+        const groupValue = Math.floor(remainder / divisor);
+        if (groupValue > 0) {
+          parts.push(`${belowThousand(groupValue)} ${label}`.trim());
+          remainder %= divisor;
+        }
+      });
+
+      return `${isNegative ? "Minus " : ""}${parts.join(" ")} Rupees Only`;
+    }
+  </script>
+</body>
+</html>
