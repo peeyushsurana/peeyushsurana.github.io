@@ -139,6 +139,8 @@ Use the same browser and the same website address to see the same saved estimate
 
 The app also asks the browser for persistent storage to reduce the chance that saved estimates are cleared automatically.
 
+In the Gold app, `Clear All` permanently removes the saved-estimate history from the current browser and resets the working estimate to `EST-2026/27-001`. When any Cash, Card, or UPI amount is entered, their combined Total Paid becomes the controlling net payable and the app distributes item amounts by weight while recalculating VA automatically.
+
 The Silver estimate is print-only. It does not save Silver estimates or change the Gold saved-estimate history. Its VA and Final Amount fields work in both directions: entering VA calculates Final Amount, while entering Final Amount calculates VA. When Cash is entered, Cash becomes the controlling invoice total and is distributed proportionally across all valid item rows.
 
 ## Test Locally With `.env`

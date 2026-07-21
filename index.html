@@ -314,6 +314,18 @@
       color: var(--red);
     }
 
+    .payment-error {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border: 1px solid #efb8b2;
+      border-radius: 8px;
+      background: #fff1ef;
+      color: var(--red);
+      font-size: 13px;
+      font-weight: 750;
+      line-height: 1.4;
+    }
+
     .icon {
       width: 19px;
       height: 19px;
@@ -1326,6 +1338,10 @@
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5z"></path><path d="M14 2v6h6"></path><path d="M12 18v-6"></path><path d="M9 15h6"></path></svg>
           New
         </button>
+        <button class="btn btn-danger" id="clearAllEstimatesBtn" type="button">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>
+          Clear All
+        </button>
         <button class="btn btn-primary" id="printBtn" type="button">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
           Print
@@ -1483,6 +1499,7 @@
               <div class="metric-value" id="totalPaidMetric">Rs. 0.00</div>
             </div>
           </div>
+          <div class="payment-error" id="paymentAllocationError" role="alert" hidden></div>
         </section>
 
         <section class="section">
@@ -1682,6 +1699,8 @@
         { weight: "", purity: "", rate: "", finalValue: "" }
       ],
       payments: { cash: "", card: "", upi: "" },
+      paymentAllocationActive: false,
+      paymentAllocationError: "",
       chit: { amount: "", bonus: "", weight: "" },
       printedEstimates: [],
       numberResetVersion: NUMBER_RESET_VERSION
@@ -1706,6 +1725,7 @@
     const downloadMonthSummaryBtn = document.getElementById("downloadMonthSummaryBtn");
     const printBtn = document.getElementById("printBtn");
     const newEstimateBtn = document.getElementById("newEstimateBtn");
+    const clearAllEstimatesBtn = document.getElementById("clearAllEstimatesBtn");
     const estimateModeButtons = document.querySelectorAll("[data-estimate-type]");
     const chitOnlyElements = document.querySelectorAll("[data-chit-only]");
     const paymentFields = {
@@ -1751,6 +1771,7 @@
         syncEstimateNumber();
         state.estimateDate = todayIso();
         if (!validateChitWeight()) return;
+        if (!validatePaymentAllocation()) return;
         savePrintedEstimate();
         render();
         applyPrintPaperSize();
@@ -1791,6 +1812,8 @@
         state = createBlankEstimateState(state.estimateSerial, state.printedEstimates, state.estimateType);
         persistAndRender();
       });
+
+      clearAllEstimatesBtn.addEventListener("click", clearAllSavedEstimates);
     }
 
     async function initializeAccessGate() {
@@ -1888,6 +1911,8 @@
       Object.entries(paymentFields).forEach(([key, input]) => {
         input.addEventListener("input", () => {
           state.payments[key] = input.value;
+          state.paymentAllocationActive = Object.values(state.payments).some((value) => cleanText(value) !== "");
+          if (!state.paymentAllocationActive) state.paymentAllocationError = "";
           persistAndRender();
         });
       });
@@ -2127,6 +2152,9 @@
       document.getElementById("oldGoldMetric").textContent = formatMoney(totals.oldGoldTotal);
       document.getElementById("netPayableMetric").textContent = formatMoney(totals.netPayable);
       document.getElementById("totalPaidMetric").textContent = formatMoney(payments.totalPaid);
+      const paymentAllocationError = document.getElementById("paymentAllocationError");
+      paymentAllocationError.textContent = state.paymentAllocationError || "";
+      paymentAllocationError.hidden = !state.paymentAllocationActive || !state.paymentAllocationError;
       document.getElementById("summaryNetWeight").textContent = formatWeight(totals.netWeight);
       document.getElementById("summaryVaWeight").textContent = formatWeight(totals.vaWeight);
       document.getElementById("summaryTaxableValue").textContent = formatMoney(totals.taxableValue);
@@ -2257,6 +2285,18 @@
       persistAndRender();
     }
 
+    function clearAllSavedEstimates() {
+      const confirmed = window.confirm("Delete all saved estimates and reset numbering to EST-2026/27-001? This cannot be undone.");
+      if (!confirmed) return;
+      editingEstimateIndex = null;
+      editingEstimateNo = "";
+      restoreStateAfterReprint = null;
+      shouldAdvanceAfterPrint = false;
+      closeEstimateActions();
+      state = createBlankEstimateState(1, [], "normal");
+      persistAndRender();
+    }
+
     function renumberSavedEstimates() {
       state.printedEstimates.forEach((record, index) => {
         record.estimateNo = createEstimateNo(index + 1);
@@ -2268,6 +2308,9 @@
     }
 
     function persistAndRender() {
+      if (state.paymentAllocationActive) {
+        state.paymentAllocationError = applyPaymentAllocation();
+      }
       saveState();
       render();
     }
@@ -2301,6 +2344,8 @@
           items: !shouldResetNumber && Array.isArray(saved.items) && saved.items.length ? saved.items.map(normalizeItem) : structuredClone(defaultState.items),
           oldGoldItems: !shouldResetNumber && Array.isArray(saved.oldGoldItems) && saved.oldGoldItems.length ? saved.oldGoldItems.map(normalizeOldGoldItem) : structuredClone(defaultState.oldGoldItems),
           payments: shouldResetNumber ? normalizePayments(defaultState.payments) : normalizePayments(saved.payments),
+          paymentAllocationActive: !shouldResetNumber && saved.paymentAllocationActive === true,
+          paymentAllocationError: "",
           chit: shouldResetNumber ? normalizeChit(defaultState.chit) : normalizeChit(saved.chit),
           printedEstimates,
           numberResetVersion: NUMBER_RESET_VERSION
@@ -2330,6 +2375,8 @@
         items: [createEmptyItem()],
         oldGoldItems: [createEmptyOldGoldItem()],
         payments: { cash: "", card: "", upi: "" },
+        paymentAllocationActive: false,
+        paymentAllocationError: "",
         chit: { amount: "", bonus: "", weight: "" },
         printedEstimates,
         numberResetVersion: NUMBER_RESET_VERSION
@@ -2398,6 +2445,7 @@
         cardPaid: toNumber(record.cardPaid),
         upiPaid: toNumber(record.upiPaid),
         totalPaid: toNumber(record.totalPaid),
+        paymentAllocationActive: record.paymentAllocationActive === true,
         chitAmount: toNumber(record.chitAmount),
         chitBonus: toNumber(record.chitBonus),
         chitWeight: toNumber(record.chitWeight),
@@ -2427,6 +2475,8 @@
           card: record.cardPaid ? String(record.cardPaid) : "",
           upi: record.upiPaid ? String(record.upiPaid) : ""
         },
+        paymentAllocationActive: record.paymentAllocationActive === true,
+        paymentAllocationError: "",
         chit: {
           amount: record.chitAmount ? String(record.chitAmount) : "",
           bonus: record.chitBonus ? String(record.chitBonus) : "",
@@ -2532,6 +2582,7 @@
         cardPaid: payments.card,
         upiPaid: payments.upi,
         totalPaid: payments.totalPaid,
+        paymentAllocationActive: state.paymentAllocationActive === true,
         chitAmount: totals.chitAmount,
         chitBonus: totals.chitBonus,
         chitWeight: totals.chitWeight,
@@ -2939,6 +2990,124 @@
       if (totals.chitWeight <= totals.netWeight) return true;
       window.alert(`Chit weight cannot be more than total net weight.\n\nNet weight: ${formatWeight(totals.netWeight)}\nChit weight: ${formatWeight(totals.chitWeight)}`);
       return false;
+    }
+
+    function validatePaymentAllocation() {
+      if (!state.paymentAllocationActive) return true;
+      state.paymentAllocationError = applyPaymentAllocation();
+      saveState();
+      if (!state.paymentAllocationError) return true;
+      render(false);
+      window.alert(state.paymentAllocationError);
+      return false;
+    }
+
+    function applyPaymentAllocation() {
+      if (!state.paymentAllocationActive) return "";
+
+      const paymentTotal = calculatePayments().totalPaid;
+      const oldGoldTotal = state.oldGoldItems.reduce((sum, item) => {
+        if (!hasOldGoldContent(item)) return sum;
+        return sum + calculateOldGoldItem(item).value;
+      }, 0);
+
+      if (!isChitEstimate()) {
+        const targetCents = Math.round((paymentTotal + oldGoldTotal) * 100);
+        if (targetCents < 0) return "Payment and old-gold values cannot produce a negative new-gold total.";
+
+        const eligibleItems = state.items
+          .map((item, index) => ({ index, weight: toNumber(item.weight), rate: toNumber(item.rate) }))
+          .filter((entry) => entry.weight > 0 && entry.rate > 0);
+
+        clearIneligiblePaymentAmounts(eligibleItems.map((entry) => entry.index));
+        if (targetCents > 0 && eligibleItems.length === 0) {
+          return "Enter a positive weight and rate for at least one gold item before using payment allocation.";
+        }
+
+        const allocations = distributeCentsByWeight(targetCents, eligibleItems);
+        eligibleItems.forEach(({ index }) => {
+          state.items[index].finalAmount = centsToInput(allocations.get(index) || 0);
+        });
+        return "";
+      }
+
+      const totalNetWeight = state.items.reduce((sum, item) => sum + toNumber(item.weight), 0);
+      const chitWeight = toNumber(state.chit.weight);
+      if (chitWeight > totalNetWeight) {
+        return `Chit weight cannot be more than total net weight. Net weight: ${formatWeight(totalNetWeight)}; chit weight: ${formatWeight(chitWeight)}.`;
+      }
+
+      const itemParts = state.items.map((item, index) => {
+        const weight = toNumber(item.weight);
+        const rate = toNumber(item.rate);
+        const allocatedChitWeight = chitWeightForItem(index);
+        const balanceWeight = Math.max(0, weight - allocatedChitWeight);
+        const fixedValue = allocatedChitWeight * rate;
+        return {
+          index,
+          weight: balanceWeight,
+          rate,
+          fixedValue,
+          fixedCents: Math.round(fixedValue * 100),
+          valid: weight > 0 && rate > 0
+        };
+      });
+
+      const fixedValueTotal = itemParts.reduce((sum, entry) => sum + entry.fixedValue, 0);
+      const fixedCentsTotal = itemParts.reduce((sum, entry) => sum + (entry.valid ? entry.fixedCents : 0), 0);
+      const desiredGrandTotal = paymentTotal
+        + oldGoldTotal
+        + toNumber(state.chit.amount)
+        + toNumber(state.chit.bonus)
+        + fixedValueTotal
+        - fixedValueTotal * GST_RATE;
+      const targetGrandCents = Math.round(desiredGrandTotal * 100);
+      const balanceTargetCents = targetGrandCents - fixedCentsTotal;
+
+      if (balanceTargetCents < 0) {
+        return "Total paid is too low for the fixed chit-weight calculation. Increase payment or reduce the chit values.";
+      }
+
+      const eligibleBalanceItems = itemParts.filter((entry) => entry.valid && entry.weight > 0);
+      clearIneligiblePaymentAmounts(itemParts.filter((entry) => entry.valid).map((entry) => entry.index));
+      if (balanceTargetCents > 0 && eligibleBalanceItems.length === 0) {
+        return "Enter a positive balance weight and rate for at least one gold item before using payment allocation.";
+      }
+
+      const balanceAllocations = distributeCentsByWeight(balanceTargetCents, eligibleBalanceItems);
+      itemParts.forEach((entry) => {
+        if (!entry.valid) return;
+        const finalCents = entry.fixedCents + (balanceAllocations.get(entry.index) || 0);
+        state.items[entry.index].finalAmount = centsToInput(finalCents);
+      });
+      return "";
+    }
+
+    function clearIneligiblePaymentAmounts(eligibleIndexes) {
+      const eligible = new Set(eligibleIndexes);
+      state.items.forEach((item, index) => {
+        if (!eligible.has(index)) item.finalAmount = "";
+      });
+    }
+
+    function distributeCentsByWeight(totalCents, entries) {
+      const allocations = new Map();
+      if (entries.length === 0) return allocations;
+      const totalWeight = entries.reduce((sum, entry) => sum + entry.weight, 0);
+      let remainingCents = totalCents;
+      entries.forEach((entry, index) => {
+        const isLast = index === entries.length - 1;
+        const cents = isLast
+          ? remainingCents
+          : Math.floor(totalCents * entry.weight / totalWeight);
+        allocations.set(entry.index, cents);
+        remainingCents -= cents;
+      });
+      return allocations;
+    }
+
+    function centsToInput(cents) {
+      return (toNumber(cents) / 100).toFixed(2);
     }
 
     function calculatePayments() {
