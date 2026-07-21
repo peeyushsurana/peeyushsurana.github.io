@@ -795,6 +795,10 @@
       #silverPrintTable td:nth-child(7) { width: 16%; }
 
       .total-area {
+        display: flex;
+        width: 100%;
+        justify-content: flex-end;
+        align-items: flex-start;
         margin-top: 2.5mm;
         break-inside: avoid;
         page-break-inside: avoid;
@@ -803,6 +807,8 @@
       .total-table {
         width: min(100%, 88mm);
         max-width: 100%;
+        margin-right: 0;
+        margin-left: auto;
         font-size: 9.5px;
       }
 
