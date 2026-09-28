@@ -2102,6 +2102,18 @@
             next.setSelectionRange(target.selectionStart, target.selectionEnd);
           }
         });
+
+        if (input.dataset.field === "va") {
+          input.addEventListener("blur", (event) => {
+            const target = event.target;
+            const index = Number(target.dataset.index);
+            if (cleanText(target.value) === "") return;
+            state.items[index].va = percentageInput(target.value);
+            state.items[index].calculationSource = "va";
+            updateItemAmountFromVa(state.items[index], index);
+            persistAndRender();
+          });
+        }
       });
 
       itemsBody.querySelectorAll("[data-remove]").forEach((button) => {
@@ -2480,7 +2492,7 @@
       return {
         ...createEmptyItem(),
         ...item,
-        va: item && Object.prototype.hasOwnProperty.call(item, "va") ? item.va : "",
+        va: item && cleanText(item.va) !== "" ? percentageInput(item.va) : "",
         calculationSource: item && item.calculationSource === "amount" ? "amount" : "va",
         finalAmount: item && Object.prototype.hasOwnProperty.call(item, "finalAmount") ? item.finalAmount : ""
       };
@@ -3230,12 +3242,12 @@
       }
 
       const targetGrandTotal = targetGrandCents / 100;
-      const commonVaAdjustment = adjustmentBase > 0
+      const commonVaAdjustment = roundPercentage(adjustmentBase > 0
         ? (targetGrandTotal - currentGrandTotal) * 100 / adjustmentBase
-        : 0;
+        : 0);
       const adjustedEntries = eligibleBalanceItems.map((entry) => ({
         ...entry,
-        adjustedVa: entry.currentVa + commonVaAdjustment
+        adjustedVa: roundPercentage(entry.currentVa + commonVaAdjustment)
       }));
       const negativeEntry = adjustedEntries.find((entry) => entry.adjustedVa < -0.000001);
       if (negativeEntry) {
@@ -3249,7 +3261,7 @@
         const finalCents = isLast ? targetGrandCents - allocatedCents : calculatedCents;
         const item = state.items[entry.index];
         item.finalAmount = centsToInput(finalCents);
-        item.va = percentageInput(vaFromAmount(item, entry.index, finalCents / 100));
+        item.va = percentageInput(entry.adjustedVa);
         item.calculationSource = "va";
         allocatedCents += finalCents;
       });
@@ -3279,7 +3291,14 @@
     }
 
     function percentageInput(value) {
-      return Number(toNumber(value).toFixed(6)).toString();
+      return roundPercentage(value).toString();
+    }
+
+    function roundPercentage(value) {
+      const number = toNumber(value);
+      const sign = number < 0 ? -1 : 1;
+      const rounded = sign * Math.round((Math.abs(number) + Number.EPSILON) * 100) / 100;
+      return Object.is(rounded, -0) ? 0 : rounded;
     }
 
     function calculatePayments() {
