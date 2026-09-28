@@ -341,10 +341,7 @@
       width: min(1520px, 100%);
       margin: 0 auto;
       padding: 22px clamp(14px, 3vw, 34px) 34px;
-      display: grid;
-      grid-template-columns: minmax(470px, 0.98fr) minmax(420px, 1.02fr);
-      gap: 22px;
-      align-items: start;
+      display: block;
     }
 
     .editor,
@@ -353,6 +350,7 @@
     }
 
     .editor {
+      width: 100%;
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -429,6 +427,33 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #fbfdff;
+    }
+
+    .gold-rate-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 360px);
+      align-items: center;
+      gap: 20px;
+      padding: 18px;
+      border: 1px solid rgba(8, 117, 95, 0.35);
+      border-radius: 8px;
+      background: #f0fdfa;
+    }
+
+    .gold-rate-copy {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .gold-rate-input {
+      min-height: 58px;
+      border-color: var(--green);
+      background: #ffffff;
+      font-size: 22px;
+      font-weight: 900;
+      text-align: right;
     }
 
     .fixed-row {
@@ -711,8 +736,7 @@
     }
 
     .preview-shell {
-      position: sticky;
-      top: 82px;
+      display: none;
     }
 
     .invoice-preview {
@@ -936,6 +960,7 @@
       .grid,
       .summary-grid,
       .fixed-row,
+      .gold-rate-panel,
       .shop-block,
       .invoice-head,
       .party-row {
@@ -1359,6 +1384,19 @@
         </section>
 
         <section class="section">
+          <div class="gold-rate-panel">
+            <div>
+              <h2 class="section-title">Gold Rate</h2>
+              <p class="gold-rate-copy">This rate is used for every new-gold item and stays saved until you change it.</p>
+            </div>
+            <div class="field">
+              <label for="goldRate">Rate per gram</label>
+              <input class="gold-rate-input" id="goldRate" inputmode="decimal" placeholder="Enter gold rate">
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
           <div class="section-header">
             <h2 class="section-title">Customer</h2>
           </div>
@@ -1398,8 +1436,8 @@
                   <th class="number-cell">Net wt</th>
                   <th class="purity-cell">Purity</th>
                   <th class="number-cell">Rate</th>
-                  <th class="amount-cell">Final amount</th>
                   <th class="number-cell">VA %</th>
+                  <th class="amount-cell">Final amount</th>
                   <th class="action-cell"></th>
                 </tr>
               </thead>
@@ -1687,13 +1725,15 @@
     };
     const defaultState = {
       estimateSerial: 1,
+      historyStartSerial: 1,
       estimateNo: createEstimateNo(1),
       estimateDate: todayIso(),
       estimateType: "normal",
+      goldRate: "",
       customerName: "",
       customerPhone: "",
       items: [
-        { name: "", weight: "", purity: "916-22K", rate: "", finalAmount: "" }
+        { name: "", weight: "", purity: "916-22K", rate: "", va: "", finalAmount: "", calculationSource: "va" }
       ],
       oldGoldItems: [
         { weight: "", purity: "", rate: "", finalValue: "" }
@@ -1714,6 +1754,7 @@
       customerPhone: document.getElementById("customerPhone")
     };
     const estimateDateField = document.getElementById("estimateDate");
+    const goldRateField = document.getElementById("goldRate");
 
     const itemsBody = document.getElementById("itemsBody");
     const oldGoldBody = document.getElementById("oldGoldBody");
@@ -1748,13 +1789,14 @@
     function startApp() {
       requestPersistentStorage();
       bindStaticFields();
+      bindGoldRateField();
       bindEstimateModeFields();
       bindPaymentFields();
       bindChitFields();
       render();
 
       addItemBtn.addEventListener("click", () => {
-        state.items.push(createEmptyItem());
+        state.items.push(createEmptyItem(state.goldRate));
         persistAndRender();
         const lastInput = itemsBody.querySelector("tr:last-child input");
         if (lastInput) lastInput.focus();
@@ -1772,6 +1814,7 @@
         state.estimateDate = todayIso();
         if (!validateChitWeight()) return;
         if (!validatePaymentAllocation()) return;
+        if (!validateNonnegativeVa()) return;
         savePrintedEstimate();
         render();
         applyPrintPaperSize();
@@ -1809,7 +1852,7 @@
       newEstimateBtn.addEventListener("click", () => {
         editingEstimateIndex = null;
         editingEstimateNo = "";
-        state = createBlankEstimateState(state.estimateSerial, state.printedEstimates, state.estimateType);
+        state = createBlankEstimateState(state.estimateSerial, state.printedEstimates, state.estimateType, state.goldRate, state.historyStartSerial);
         persistAndRender();
       });
 
@@ -1907,6 +1950,22 @@
       });
     }
 
+    function bindGoldRateField() {
+      goldRateField.addEventListener("input", () => {
+        const existingVas = state.items.map((item, index) => (
+          cleanText(item.va) !== "" ? item.va : percentageInput(calculateItem(item, index).va)
+        ));
+        state.goldRate = goldRateField.value;
+        state.items.forEach((item, index) => {
+          item.rate = state.goldRate;
+          item.va = existingVas[index];
+          item.calculationSource = "va";
+          updateItemAmountFromVa(item, index);
+        });
+        persistAndRender();
+      });
+    }
+
     function bindPaymentFields() {
       Object.entries(paymentFields).forEach(([key, input]) => {
         input.addEventListener("input", () => {
@@ -1922,6 +1981,7 @@
       estimateModeButtons.forEach((button) => {
         button.addEventListener("click", () => {
           state.estimateType = button.dataset.estimateType === "chit" ? "chit" : "normal";
+          synchronizeItemsForCalculationSource();
           persistAndRender();
         });
       });
@@ -1931,8 +1991,16 @@
       Object.entries(chitFields).forEach(([key, input]) => {
         input.addEventListener("input", () => {
           state.chit[key] = input.value;
+          if (key === "weight") synchronizeItemsForCalculationSource();
           persistAndRender();
         });
+      });
+    }
+
+    function synchronizeItemsForCalculationSource() {
+      state.items.forEach((item, index) => {
+        if (item.calculationSource === "amount") updateItemVaFromAmount(item, index);
+        else updateItemAmountFromVa(item, index);
       });
     }
 
@@ -1942,6 +2010,7 @@
       state.chit = normalizeChit(state.chit);
       renderEstimateMode();
       renderStaticFields();
+      renderGoldRateField();
       renderDateDisplay();
       renderPaymentFields();
       renderChitFields();
@@ -1960,6 +2029,10 @@
 
     function renderDateDisplay() {
       estimateDateField.value = formatDate(state.estimateDate);
+    }
+
+    function renderGoldRateField() {
+      if (goldRateField.value !== state.goldRate) goldRateField.value = state.goldRate || "";
     }
 
     function renderPaymentFields() {
@@ -1997,9 +2070,9 @@
           <td class="item-name-cell"><input aria-label="Item name" data-field="name" data-index="${index}" value="${escapeAttribute(item.name)}" placeholder="Ring"></td>
           <td class="number-cell"><input aria-label="Net weight" data-field="weight" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.weight)}" placeholder="Grams"></td>
           <td class="purity-cell"><input aria-label="Purity" data-field="purity" data-index="${index}" list="purityOptions" value="${escapeAttribute(item.purity)}" placeholder="916-22K"></td>
-          <td class="number-cell"><input aria-label="Rate" data-field="rate" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.rate)}" placeholder="Rate"></td>
+          <td class="number-cell"><input aria-label="Rate" data-field="rate" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.rate)}" placeholder="Rate" readonly></td>
+          <td class="number-cell"><input aria-label="VA percentage" data-field="va" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.va !== "" ? item.va : formatNumber(calc.va, 2))}" placeholder="VA %"></td>
           <td class="amount-cell"><input aria-label="Final amount" data-field="finalAmount" data-index="${index}" inputmode="decimal" value="${escapeAttribute(item.finalAmount)}" placeholder="Amount"></td>
-          <td class="number-cell"><input aria-label="VA percentage" value="${escapeAttribute(formatNumber(calc.va, 2))}" readonly></td>
           <td class="action-cell">
             <button class="btn btn-icon btn-danger" type="button" data-remove="${index}" aria-label="Remove item" title="Remove item">
               <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>
@@ -2015,6 +2088,13 @@
           const index = Number(target.dataset.index);
           const field = target.dataset.field;
           state.items[index][field] = target.value;
+          if (field === "weight" || field === "va") {
+            state.items[index].calculationSource = "va";
+            updateItemAmountFromVa(state.items[index], index);
+          } else if (field === "finalAmount") {
+            state.items[index].calculationSource = "amount";
+            updateItemVaFromAmount(state.items[index], index);
+          }
           persistAndRender();
           const next = itemsBody.querySelector(`[data-index="${index}"][data-field="${field}"]`);
           if (next) {
@@ -2281,30 +2361,31 @@
       editingEstimateIndex = null;
       editingEstimateNo = "";
       renumberSavedEstimates();
-      state = createBlankEstimateState(nextSerialFromSavedEstimates(), state.printedEstimates, state.estimateType);
+      state = createBlankEstimateState(nextSerialFromSavedEstimates(), state.printedEstimates, state.estimateType, state.goldRate, state.historyStartSerial);
       persistAndRender();
     }
 
     function clearAllSavedEstimates() {
-      const confirmed = window.confirm("Delete all saved estimates and reset numbering to EST-2026/27-001? This cannot be undone.");
+      const nextSerial = nextSerialFromSavedEstimates();
+      const confirmed = window.confirm(`Delete all saved estimates? The next estimate number will remain ${createEstimateNo(nextSerial)}. This cannot be undone.`);
       if (!confirmed) return;
       editingEstimateIndex = null;
       editingEstimateNo = "";
       restoreStateAfterReprint = null;
       shouldAdvanceAfterPrint = false;
       closeEstimateActions();
-      state = createBlankEstimateState(1, [], "normal");
+      state = createBlankEstimateState(nextSerial, [], "normal", state.goldRate, nextSerial);
       persistAndRender();
     }
 
     function renumberSavedEstimates() {
       state.printedEstimates.forEach((record, index) => {
-        record.estimateNo = createEstimateNo(index + 1);
+        record.estimateNo = createEstimateNo(state.historyStartSerial + index);
       });
     }
 
     function nextSerialFromSavedEstimates() {
-      return (state.printedEstimates || []).length + 1;
+      return state.historyStartSerial + (state.printedEstimates || []).length;
     }
 
     function persistAndRender() {
@@ -2333,15 +2414,25 @@
         const shouldResetNumber = saved.numberResetVersion !== NUMBER_RESET_VERSION;
         const printedEstimates = Array.isArray(saved.printedEstimates) ? saved.printedEstimates.map(normalizePrintedEstimate) : [];
         const estimateSerial = shouldResetNumber ? printedEstimates.length + 1 : Number(saved.estimateSerial) || serialFromEstimateNo(saved.estimateNo) || defaultState.estimateSerial;
+        const historyStartSerial = Number(saved.historyStartSerial)
+          || (printedEstimates[0] ? serialFromEstimateNo(printedEstimates[0].estimateNo) : 0)
+          || 1;
+        const savedItems = !shouldResetNumber && Array.isArray(saved.items) && saved.items.length
+          ? saved.items.map(normalizeItem)
+          : structuredClone(defaultState.items);
+        const goldRate = cleanText(saved.goldRate)
+          || cleanText((savedItems.find((item) => toNumber(item.rate) > 0) || {}).rate);
         return {
           ...structuredClone(defaultState),
           estimateSerial,
+          historyStartSerial,
           estimateNo: createEstimateNo(estimateSerial),
           estimateDate: todayIso(),
           estimateType: shouldResetNumber ? "normal" : normalizeEstimateType(saved.estimateType),
+          goldRate,
           customerName: shouldResetNumber ? "" : saved.customerName || "",
           customerPhone: shouldResetNumber ? "" : saved.customerPhone || "",
-          items: !shouldResetNumber && Array.isArray(saved.items) && saved.items.length ? saved.items.map(normalizeItem) : structuredClone(defaultState.items),
+          items: savedItems,
           oldGoldItems: !shouldResetNumber && Array.isArray(saved.oldGoldItems) && saved.oldGoldItems.length ? saved.oldGoldItems.map(normalizeOldGoldItem) : structuredClone(defaultState.oldGoldItems),
           payments: shouldResetNumber ? normalizePayments(defaultState.payments) : normalizePayments(saved.payments),
           paymentAllocationActive: !shouldResetNumber && saved.paymentAllocationActive === true,
@@ -2355,24 +2446,26 @@
       }
     }
 
-    function createEmptyItem() {
-      return { name: "", weight: "", purity: "916-22K", rate: "", finalAmount: "" };
+    function createEmptyItem(rate = "") {
+      return { name: "", weight: "", purity: "916-22K", rate, va: "", finalAmount: "", calculationSource: "va" };
     }
 
     function createEmptyOldGoldItem() {
       return { weight: "", purity: "", rate: "", finalValue: "" };
     }
 
-    function createBlankEstimateState(serial, printedEstimates, estimateType = "normal") {
+    function createBlankEstimateState(serial, printedEstimates, estimateType = "normal", goldRate = "", historyStartSerial = 1) {
       return {
         ...structuredClone(defaultState),
         estimateSerial: serial,
+        historyStartSerial,
         estimateNo: createEstimateNo(serial),
         estimateDate: todayIso(),
         estimateType: normalizeEstimateType(estimateType),
+        goldRate,
         customerName: "",
         customerPhone: "",
-        items: [createEmptyItem()],
+        items: [createEmptyItem(goldRate)],
         oldGoldItems: [createEmptyOldGoldItem()],
         payments: { cash: "", card: "", upi: "" },
         paymentAllocationActive: false,
@@ -2387,6 +2480,8 @@
       return {
         ...createEmptyItem(),
         ...item,
+        va: item && Object.prototype.hasOwnProperty.call(item, "va") ? item.va : "",
+        calculationSource: item && item.calculationSource === "amount" ? "amount" : "va",
         finalAmount: item && Object.prototype.hasOwnProperty.call(item, "finalAmount") ? item.finalAmount : ""
       };
     }
@@ -2430,6 +2525,7 @@
       const dateIso = record.dateIso || isoFromDisplayDate(record.date) || "";
       return {
         estimateNo: record.estimateNo || "",
+        goldRate: cleanText(record.goldRate),
         estimateType: normalizeEstimateType(record.estimateType),
         date: record.date || "",
         dateIso,
@@ -2460,15 +2556,21 @@
 
     function createStateFromPrintedEstimate(record, existingState) {
       const serial = serialFromEstimateNo(record.estimateNo) || existingState.estimateSerial || 1;
+      const recordItems = printableItemsFromRecord(record);
+      const recordGoldRate = cleanText(record.goldRate)
+        || cleanText((recordItems.find((item) => toNumber(item.rate) > 0) || {}).rate)
+        || existingState.goldRate
+        || "";
       return {
         ...existingState,
         estimateSerial: serial,
         estimateNo: record.estimateNo || createEstimateNo(serial),
         estimateDate: record.dateIso || isoFromDisplayDate(record.date) || todayIso(),
         estimateType: normalizeEstimateType(record.estimateType),
+        goldRate: recordGoldRate,
         customerName: record.customerName || "",
         customerPhone: record.customerPhone || "",
-        items: printableItemsFromRecord(record),
+        items: recordItems,
         oldGoldItems: printableOldGoldFromRecord(record),
         payments: {
           cash: record.cashPaid ? String(record.cashPaid) : "",
@@ -2556,6 +2658,8 @@
         weight: cleanText(item.weight),
         purity: cleanText(item.purity),
         rate: cleanText(item.rate),
+        va: cleanText(item.va),
+        calculationSource: item.calculationSource === "amount" ? "amount" : "va",
         finalAmount: cleanText(item.finalAmount)
       }));
       const savedOldGoldItems = printableOldGoldItems.map((item) => ({
@@ -2567,6 +2671,7 @@
 
       return {
         estimateNo: state.estimateNo,
+        goldRate: cleanText(state.goldRate),
         estimateType: normalizeEstimateType(state.estimateType),
         dateIso: state.estimateDate,
         date: formatDate(state.estimateDate),
@@ -2850,7 +2955,7 @@
 
     function openNextBlankEstimate() {
       const nextSerial = nextSerialFromSavedEstimates();
-      state = createBlankEstimateState(nextSerial, state.printedEstimates, state.estimateType);
+      state = createBlankEstimateState(nextSerial, state.printedEstimates, state.estimateType, state.goldRate, state.historyStartSerial);
       persistAndRender();
     }
 
@@ -2889,10 +2994,52 @@
       const chitWeightValue = calculateChitWeightValue(chitWeight, rate);
       const balanceAmount = Math.max(0, amount - chitWeightValue);
       const baseAmount = balanceWeight * rate * (isChitEstimate() ? 1 + GST_RATE : 1);
-      const va = balanceWeight > 0 && rate > 0 && balanceAmount > 0 ? ((balanceAmount / baseAmount) - 1) * 100 : 0;
+      const storedVa = cleanText(item.va);
+      const derivedVa = balanceWeight > 0 && rate > 0 && balanceAmount > 0 ? ((balanceAmount / baseAmount) - 1) * 100 : 0;
+      const va = storedVa !== "" ? toNumber(storedVa) : derivedVa;
       const vaWeight = balanceWeight * va / 100;
       const billableWeight = balanceWeight + vaWeight;
       return { weight, chitWeight, balanceWeight, chitWeightValue, balanceAmount, va, rate, vaWeight, billableWeight, amount };
+    }
+
+    function amountFromVa(item, itemIndex, va = toNumber(item.va)) {
+      const weight = toNumber(item.weight);
+      const rate = toNumber(item.rate);
+      if (weight <= 0 || rate <= 0) return 0;
+      if (!isChitEstimate()) return weight * rate * (1 + va / 100);
+      const chitWeight = chitWeightForItem(itemIndex);
+      const balanceWeight = Math.max(0, weight - chitWeight);
+      const fixedValue = chitWeight * rate;
+      return fixedValue + balanceWeight * rate * (1 + GST_RATE) * (1 + va / 100);
+    }
+
+    function vaFromAmount(item, itemIndex, amount = toNumber(item.finalAmount)) {
+      const weight = toNumber(item.weight);
+      const rate = toNumber(item.rate);
+      if (weight <= 0 || rate <= 0) return 0;
+      if (!isChitEstimate()) return ((amount / (weight * rate)) - 1) * 100;
+      const chitWeight = chitWeightForItem(itemIndex);
+      const balanceWeight = Math.max(0, weight - chitWeight);
+      if (balanceWeight <= 0) return 0;
+      const fixedValue = chitWeight * rate;
+      const balanceBase = balanceWeight * rate * (1 + GST_RATE);
+      return (((amount - fixedValue) / balanceBase) - 1) * 100;
+    }
+
+    function updateItemAmountFromVa(item, itemIndex) {
+      if (toNumber(item.weight) <= 0 || toNumber(item.rate) <= 0) {
+        item.finalAmount = "";
+        return;
+      }
+      item.finalAmount = moneyInput(amountFromVa(item, itemIndex));
+    }
+
+    function updateItemVaFromAmount(item, itemIndex) {
+      if (cleanText(item.finalAmount) === "" || toNumber(item.weight) <= 0 || toNumber(item.rate) <= 0) {
+        item.va = "";
+        return;
+      }
+      item.va = percentageInput(vaFromAmount(item, itemIndex));
     }
 
     function calculateOldGoldItem(item) {
@@ -3002,6 +3149,16 @@
       return false;
     }
 
+    function validateNonnegativeVa() {
+      const invalidItem = state.items.find((item, index) => {
+        if (!hasItemContent(item)) return false;
+        return calculateItem(item, index).va < -0.000001;
+      });
+      if (!invalidItem) return true;
+      window.alert("VA percentage cannot be below 0%. Increase the item Final Amount or the combined payment amount before printing.");
+      return false;
+    }
+
     function applyPaymentAllocation() {
       if (!state.paymentAllocationActive) return "";
 
@@ -3010,75 +3167,98 @@
         if (!hasOldGoldContent(item)) return sum;
         return sum + calculateOldGoldItem(item).value;
       }, 0);
-
-      if (!isChitEstimate()) {
-        const targetCents = Math.round((paymentTotal + oldGoldTotal) * 100);
-        if (targetCents < 0) return "Payment and old-gold values cannot produce a negative new-gold total.";
-
-        const eligibleItems = state.items
-          .map((item, index) => ({ index, weight: toNumber(item.weight), rate: toNumber(item.rate) }))
-          .filter((entry) => entry.weight > 0 && entry.rate > 0);
-
-        clearIneligiblePaymentAmounts(eligibleItems.map((entry) => entry.index));
-        if (targetCents > 0 && eligibleItems.length === 0) {
-          return "Enter a positive weight and rate for at least one gold item before using payment allocation.";
-        }
-
-        const allocations = distributeCentsByWeight(targetCents, eligibleItems);
-        eligibleItems.forEach(({ index }) => {
-          state.items[index].finalAmount = centsToInput(allocations.get(index) || 0);
-        });
-        return "";
-      }
-
       const totalNetWeight = state.items.reduce((sum, item) => sum + toNumber(item.weight), 0);
       const chitWeight = toNumber(state.chit.weight);
-      if (chitWeight > totalNetWeight) {
+      if (isChitEstimate() && chitWeight > totalNetWeight) {
         return `Chit weight cannot be more than total net weight. Net weight: ${formatWeight(totalNetWeight)}; chit weight: ${formatWeight(chitWeight)}.`;
       }
 
       const itemParts = state.items.map((item, index) => {
         const weight = toNumber(item.weight);
         const rate = toNumber(item.rate);
-        const allocatedChitWeight = chitWeightForItem(index);
+        const allocatedChitWeight = isChitEstimate() ? chitWeightForItem(index) : 0;
         const balanceWeight = Math.max(0, weight - allocatedChitWeight);
         const fixedValue = allocatedChitWeight * rate;
+        const baseAmount = balanceWeight * rate * (isChitEstimate() ? 1 + GST_RATE : 1);
+        const currentVa = cleanText(item.va) !== ""
+          ? toNumber(item.va)
+          : cleanText(item.finalAmount) !== ""
+            ? vaFromAmount(item, index)
+            : 0;
         return {
           index,
-          weight: balanceWeight,
+          balanceWeight,
           rate,
           fixedValue,
-          fixedCents: Math.round(fixedValue * 100),
-          valid: weight > 0 && rate > 0
+          baseAmount,
+          currentVa,
+          valid: weight > 0 && rate > 0,
+          eligible: weight > 0 && rate > 0 && balanceWeight > 0
         };
       });
 
       const fixedValueTotal = itemParts.reduce((sum, entry) => sum + entry.fixedValue, 0);
-      const fixedCentsTotal = itemParts.reduce((sum, entry) => sum + (entry.valid ? entry.fixedCents : 0), 0);
-      const desiredGrandTotal = paymentTotal
-        + oldGoldTotal
-        + toNumber(state.chit.amount)
-        + toNumber(state.chit.bonus)
-        + fixedValueTotal
-        - fixedValueTotal * GST_RATE;
+      const desiredGrandTotal = isChitEstimate()
+        ? paymentTotal
+          + oldGoldTotal
+          + toNumber(state.chit.amount)
+          + toNumber(state.chit.bonus)
+          + fixedValueTotal
+          - fixedValueTotal * GST_RATE
+        : paymentTotal + oldGoldTotal;
       const targetGrandCents = Math.round(desiredGrandTotal * 100);
-      const balanceTargetCents = targetGrandCents - fixedCentsTotal;
+      if (targetGrandCents < 0) return "Payment and deductions cannot produce a negative new-gold total.";
 
-      if (balanceTargetCents < 0) {
-        return "Total paid is too low for the fixed chit-weight calculation. Increase payment or reduce the chit values.";
-      }
-
-      const eligibleBalanceItems = itemParts.filter((entry) => entry.valid && entry.weight > 0);
+      const eligibleBalanceItems = itemParts.filter((entry) => entry.eligible);
+      const fixedOnlyCents = itemParts
+        .filter((entry) => entry.valid && !entry.eligible)
+        .reduce((sum, entry) => sum + Math.round(entry.fixedValue * 100), 0);
       clearIneligiblePaymentAmounts(itemParts.filter((entry) => entry.valid).map((entry) => entry.index));
-      if (balanceTargetCents > 0 && eligibleBalanceItems.length === 0) {
-        return "Enter a positive balance weight and rate for at least one gold item before using payment allocation.";
+      if (eligibleBalanceItems.length === 0 && targetGrandCents !== fixedOnlyCents) {
+        return isChitEstimate()
+          ? "Enter a positive balance weight and Gold Rate for at least one item before using payment allocation."
+          : "Enter a positive weight and Gold Rate for at least one item before using payment allocation.";
       }
 
-      const balanceAllocations = distributeCentsByWeight(balanceTargetCents, eligibleBalanceItems);
-      itemParts.forEach((entry) => {
-        if (!entry.valid) return;
-        const finalCents = entry.fixedCents + (balanceAllocations.get(entry.index) || 0);
-        state.items[entry.index].finalAmount = centsToInput(finalCents);
+      const currentGrandTotal = itemParts.reduce((sum, entry) => {
+        if (!entry.valid) return sum;
+        return sum + entry.fixedValue + entry.baseAmount * (1 + entry.currentVa / 100);
+      }, 0);
+      const adjustmentBase = eligibleBalanceItems.reduce((sum, entry) => sum + entry.baseAmount, 0);
+      if (adjustmentBase <= 0 && targetGrandCents !== Math.round(currentGrandTotal * 100)) {
+        return "The entered payment cannot be allocated because there is no eligible gold weight.";
+      }
+
+      const targetGrandTotal = targetGrandCents / 100;
+      const commonVaAdjustment = adjustmentBase > 0
+        ? (targetGrandTotal - currentGrandTotal) * 100 / adjustmentBase
+        : 0;
+      const adjustedEntries = eligibleBalanceItems.map((entry) => ({
+        ...entry,
+        adjustedVa: entry.currentVa + commonVaAdjustment
+      }));
+      const negativeEntry = adjustedEntries.find((entry) => entry.adjustedVa < -0.000001);
+      if (negativeEntry) {
+        return "Total paid is too low because it would make one or more item VA percentages negative. Increase the payment amount.";
+      }
+
+      let allocatedCents = fixedOnlyCents;
+      adjustedEntries.forEach((entry, adjustedIndex) => {
+        const isLast = adjustedIndex === adjustedEntries.length - 1;
+        const calculatedCents = Math.round((entry.fixedValue + entry.baseAmount * (1 + entry.adjustedVa / 100)) * 100);
+        const finalCents = isLast ? targetGrandCents - allocatedCents : calculatedCents;
+        const item = state.items[entry.index];
+        item.finalAmount = centsToInput(finalCents);
+        item.va = percentageInput(vaFromAmount(item, entry.index, finalCents / 100));
+        item.calculationSource = "va";
+        allocatedCents += finalCents;
+      });
+
+      itemParts.filter((entry) => entry.valid && !entry.eligible).forEach((entry) => {
+        const item = state.items[entry.index];
+        item.finalAmount = moneyInput(entry.fixedValue);
+        item.va = "0";
+        item.calculationSource = "va";
       });
       return "";
     }
@@ -3090,24 +3270,16 @@
       });
     }
 
-    function distributeCentsByWeight(totalCents, entries) {
-      const allocations = new Map();
-      if (entries.length === 0) return allocations;
-      const totalWeight = entries.reduce((sum, entry) => sum + entry.weight, 0);
-      let remainingCents = totalCents;
-      entries.forEach((entry, index) => {
-        const isLast = index === entries.length - 1;
-        const cents = isLast
-          ? remainingCents
-          : Math.floor(totalCents * entry.weight / totalWeight);
-        allocations.set(entry.index, cents);
-        remainingCents -= cents;
-      });
-      return allocations;
-    }
-
     function centsToInput(cents) {
       return (toNumber(cents) / 100).toFixed(2);
+    }
+
+    function moneyInput(value) {
+      return toNumber(value).toFixed(2);
+    }
+
+    function percentageInput(value) {
+      return Number(toNumber(value).toFixed(6)).toString();
     }
 
     function calculatePayments() {
@@ -3133,7 +3305,7 @@
     }
 
     function hasItemContent(item) {
-      return ["name", "weight", "rate", "finalAmount"].some((key) => cleanText(item[key]));
+      return ["name", "weight", "va", "finalAmount"].some((key) => cleanText(item[key]));
     }
 
     function hasOldGoldContent(item) {
