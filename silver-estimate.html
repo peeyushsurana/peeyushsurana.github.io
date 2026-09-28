@@ -53,10 +53,6 @@
       display: none !important;
     }
 
-    body:not(.access-granted) .app {
-      display: none;
-    }
-
     .access-gate {
       min-height: 100vh;
       display: grid;
@@ -292,10 +288,9 @@
     }
 
     .content {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(480px, 0.92fr);
-      gap: 24px;
-      align-items: start;
+      display: block;
+      width: min(1520px, 100%);
+      margin: 0 auto;
       padding: 24px clamp(18px, 4vw, 42px) 46px;
     }
 
@@ -323,6 +318,84 @@
       margin: 0;
       font-size: 16px;
       font-weight: 900;
+    }
+
+    .rate-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 340px);
+      align-items: center;
+      gap: 20px;
+      padding: 18px;
+      border: 1px solid rgba(8, 117, 95, 0.35);
+      border-radius: 8px;
+      background: #f0fdfa;
+    }
+
+    .rate-copy {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .rate-input {
+      min-height: 58px;
+      border-color: var(--accent);
+      background: #ffffff;
+      font-size: 22px;
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .saved-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .saved-record {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .saved-name {
+      min-height: 46px;
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--ink);
+      font-weight: 850;
+      text-align: left;
+    }
+
+    .saved-name:hover,
+    .saved-name.is-active {
+      border-color: var(--accent);
+      background: #f0fdfa;
+    }
+
+    .saved-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .saved-actions .btn {
+      min-height: 42px;
+      padding: 8px 11px;
+    }
+
+    .saved-actions .btn-danger {
+      width: auto;
+    }
+
+    .saved-empty {
+      margin: 14px 0 0;
+      color: var(--muted);
     }
 
     .grid {
@@ -436,10 +509,7 @@
     }
 
     .preview-shell {
-      position: sticky;
-      top: 86px;
-      min-width: 0;
-      isolation: isolate;
+      display: none;
     }
 
     .invoice-preview {
@@ -592,11 +662,7 @@
 
     @media (max-width: 1080px) {
       .content {
-        grid-template-columns: 1fr;
-      }
-
-      .preview-shell {
-        position: static;
+        width: 100%;
       }
     }
 
@@ -616,6 +682,7 @@
 
       .grid,
       .metrics,
+      .rate-panel,
       .invoice-head {
         grid-template-columns: 1fr;
       }
@@ -893,19 +960,6 @@
   </style>
 </head>
 <body>
-  <section class="access-gate" aria-label="Access code">
-    <form class="access-panel" id="accessForm">
-      <img class="access-logo" src="surana-silver-house-logo.png" alt="Surana Silver House">
-      <p class="access-copy">Enter the access code to open the Silver estimate.</p>
-      <div class="access-field">
-        <label for="accessCode">Access code</label>
-        <input id="accessCode" type="password" autocomplete="current-password" required>
-      </div>
-      <button class="access-btn" type="submit">Open app</button>
-      <div class="access-error" id="accessError" role="alert"></div>
-    </form>
-  </section>
-
   <div class="app">
     <header class="topbar">
       <div class="brand">
@@ -929,6 +983,19 @@
 
     <main class="content">
       <div class="editor" aria-label="Silver estimate form">
+        <section class="section">
+          <div class="rate-panel">
+            <div>
+              <h2 class="section-title">Silver Rate</h2>
+              <p class="rate-copy">This rate is used for every silver item and stays saved until you change it.</p>
+            </div>
+            <div>
+              <label for="silverRate">Rate per gram</label>
+              <input class="rate-input" id="silverRate" inputmode="decimal" placeholder="Enter silver rate">
+            </div>
+          </div>
+        </section>
+
         <section class="section">
           <h2 class="section-title">Customer</h2>
           <div class="grid">
@@ -1004,6 +1071,12 @@
               <div class="metric-value" id="totalPaidMetric">Rs. 0.00</div>
             </div>
           </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Saved Estimates Today</h2>
+          <div class="saved-list" id="savedEstimatesList"></div>
+          <p class="saved-empty" id="savedEstimatesEmpty">No Silver estimates saved today.</p>
         </section>
       </div>
 
@@ -1087,8 +1160,7 @@
   </div>
 
   <script>
-    const ACCESS_CODE = "__ACCESS_CODE__";
-    const accessSessionKey = "surana-estimate-access-ok-v1";
+    const storageKey = "surana-silver-estimates-v1";
     const GST_RATE = 0.03;
     const CGST_RATE = 0.015;
     const SGST_RATE = 0.015;
@@ -1100,8 +1172,12 @@
     };
     const purityOptions = ["Reg", "80", "92.5", "999"];
 
-    let state = createBlankState();
+    let state = loadState();
     let shouldResetAfterPrint = false;
+    let restoreStateAfterReprint = null;
+    let editingEstimateId = "";
+    let activeSavedEstimateId = "";
+    let midnightTimer = null;
 
     const itemsBody = document.getElementById("itemsBody");
     const addItemBtn = document.getElementById("addItemBtn");
@@ -1111,18 +1187,23 @@
     const customerName = document.getElementById("customerName");
     const customerPhone = document.getElementById("customerPhone");
     const cashAmount = document.getElementById("cashAmount");
+    const silverRate = document.getElementById("silverRate");
+    const savedEstimatesList = document.getElementById("savedEstimatesList");
+    const savedEstimatesEmpty = document.getElementById("savedEstimatesEmpty");
 
-    initializeAccessGate();
+    startApp();
 
     function startApp() {
+      requestPersistentStorage();
+      clearExpiredSavedEstimates();
       bindStaticFields();
       render();
+      scheduleMidnightCleanup();
 
       addItemBtn.addEventListener("click", () => {
-        state.items.push(createEmptyItem());
+        state.items.push(createEmptyItem(state.silverRate));
         applyCashAllocation();
-        renderItemRows();
-        renderSummaryAndPreview();
+        persistAndRender();
         const inputs = itemsBody.querySelectorAll("input[data-item-field='name']");
         const lastInput = inputs[inputs.length - 1];
         if (lastInput) lastInput.focus();
@@ -1132,7 +1213,9 @@
 
       printBtn.addEventListener("click", () => {
         state.date = todayIso();
+        savePrintedEstimate();
         renderStaticFields();
+        renderSavedEstimates();
         renderSummaryAndPreview();
         applyPrintDensity();
         shouldResetAfterPrint = true;
@@ -1148,21 +1231,51 @@
 
       window.addEventListener("afterprint", () => {
         clearPrintDensity();
+        if (restoreStateAfterReprint) {
+          state = restoreStateAfterReprint;
+          restoreStateAfterReprint = null;
+          persistAndRender();
+          return;
+        }
         if (!shouldResetAfterPrint) return;
         shouldResetAfterPrint = false;
         resetEstimate();
+      });
+
+      window.addEventListener("focus", clearExpiredSavedEstimates);
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) clearExpiredSavedEstimates();
       });
     }
 
     function bindStaticFields() {
       customerName.addEventListener("input", () => {
         state.customerName = customerName.value;
+        saveState();
         renderSummaryAndPreview();
       });
 
       customerPhone.addEventListener("input", () => {
         state.customerPhone = customerPhone.value;
+        saveState();
         renderSummaryAndPreview();
+      });
+
+      silverRate.addEventListener("input", () => {
+        const existingVas = state.items.map((item) => {
+          if (cleanText(item.va) !== "") return item.va;
+          if (toNumber(item.weight) > 0 && cleanText(item.finalAmount) !== "") return calculateItem(item).va;
+          return "";
+        });
+        state.silverRate = silverRate.value;
+        state.items.forEach((item, index) => {
+          item.rate = state.silverRate;
+          item.va = cleanText(existingVas[index]) !== "" ? formatInputNumber(existingVas[index]) : "";
+          item.calculationMode = "va";
+          updateItemFromVa(item);
+        });
+        if (hasControllingCash()) applyCashAllocation();
+        persistAndRender();
       });
 
       cashAmount.addEventListener("input", () => {
@@ -1180,40 +1293,47 @@
         renderItemRows();
         renderSummaryAndPreview();
         document.getElementById("totalPaidMetric").textContent = formatMoney(toNumber(state.cash));
+        saveState();
       });
     }
 
-    function createBlankState() {
+    function createBlankState(silverRateValue = "", savedEstimates = [], savedDate = todayIso()) {
       return {
         date: todayIso(),
+        savedDate,
+        silverRate: silverRateValue,
         customerName: "",
         customerPhone: "",
         cash: "",
-        items: [createEmptyItem()]
+        items: [createEmptyItem(silverRateValue)],
+        savedEstimates
       };
     }
 
-    function createEmptyItem() {
+    function createEmptyItem(rate = "") {
       return {
         name: "",
         weight: "",
         purity: "Reg",
-        rate: "",
+        rate,
         finalAmount: "",
         va: "",
-        calculationMode: "amount"
+        calculationMode: "va"
       };
     }
 
     function resetEstimate() {
-      state = createBlankState();
-      render();
+      editingEstimateId = "";
+      activeSavedEstimateId = "";
+      state = createBlankState(state.silverRate, state.savedEstimates, state.savedDate);
+      persistAndRender();
     }
 
     function render() {
       renderStaticFields();
       renderItemRows();
       renderSummaryAndPreview();
+      renderSavedEstimates();
     }
 
     function renderStaticFields() {
@@ -1221,6 +1341,7 @@
       customerName.value = state.customerName;
       customerPhone.value = state.customerPhone;
       cashAmount.value = state.cash;
+      silverRate.value = state.silverRate || "";
       document.getElementById("totalPaidMetric").textContent = formatMoney(toNumber(state.cash));
     }
 
@@ -1237,7 +1358,7 @@
               ${purityOptions.map((option) => `<option value="${option}"${item.purity === option ? " selected" : ""}>${option}</option>`).join("")}
             </select>
           </td>
-          <td class="number-cell"><input aria-label="Rate" data-item-field="rate" inputmode="decimal" value="${escapeAttribute(item.rate)}" placeholder="Rate"></td>
+          <td class="number-cell"><input aria-label="Rate" data-item-field="rate" inputmode="decimal" value="${escapeAttribute(item.rate)}" placeholder="Rate" readonly></td>
           <td class="amount-cell"><input aria-label="Final amount" data-item-field="finalAmount" inputmode="decimal" value="${escapeAttribute(item.finalAmount)}" placeholder="Amount"></td>
           <td class="number-cell"><input aria-label="VA percentage" data-item-field="va" inputmode="decimal" value="${escapeAttribute(item.va)}" placeholder="VA %"></td>
           <td class="amount-cell row-total" data-row-total>${formatMoney(calc.amount)}</td>
@@ -1274,17 +1395,31 @@
             }
             syncRenderedItemValues();
             renderSummaryAndPreview();
+            saveState();
           });
+
+          if (control.dataset.itemField === "va") {
+            control.addEventListener("blur", () => {
+              const currentItem = state.items[index];
+              if (cleanText(control.value) === "") return;
+              currentItem.va = formatInputNumber(control.value);
+              currentItem.calculationMode = "va";
+              updateItemFromVa(currentItem);
+              if (hasControllingCash()) applyCashAllocation();
+              syncRenderedItemValues();
+              renderSummaryAndPreview();
+              saveState();
+            });
+          }
         });
       });
 
       itemsBody.querySelectorAll("[data-remove-item]").forEach((button) => {
         button.addEventListener("click", () => {
           state.items.splice(Number(button.dataset.removeItem), 1);
-          if (state.items.length === 0) state.items.push(createEmptyItem());
+          if (state.items.length === 0) state.items.push(createEmptyItem(state.silverRate));
           applyCashAllocation();
-          renderItemRows();
-          renderSummaryAndPreview();
+          persistAndRender();
         });
       });
     }
@@ -1345,7 +1480,7 @@
       const amount = cleanText(item.finalAmount) ? toNumber(item.finalAmount) : 0;
       const baseAmount = weight * rate;
       const calculatedVa = baseAmount > 0 && cleanText(item.finalAmount)
-        ? ((amount / baseAmount) - 1) * 100
+        ? roundPercentage(((amount / baseAmount) - 1) * 100)
         : 0;
       const va = (item.calculationMode === "va" || item.calculationMode === "cash") && cleanText(item.va)
         ? toNumber(item.va)
@@ -1356,7 +1491,7 @@
 
     function updateItemFromVa(item) {
       const baseAmount = toNumber(item.weight) * toNumber(item.rate);
-      if (!cleanText(item.va) || baseAmount <= 0) {
+      if (baseAmount <= 0) {
         item.finalAmount = "";
         return;
       }
@@ -1395,15 +1530,15 @@
 
       const totalBase = eligibleItems.reduce((sum, entry) => sum + entry.baseAmount, 0);
       const cashCents = Math.round(toNumber(state.cash) * 100);
-      const commonVa = ((cashCents / 100 / totalBase) - 1) * 100;
-      let remainingCents = cashCents;
+      const commonVa = roundPercentage(((cashCents / 100 / totalBase) - 1) * 100);
+      let allocatedCents = 0;
 
       eligibleItems.forEach(({ item, baseAmount }, index) => {
         const isLast = index === eligibleItems.length - 1;
         const itemCents = isLast
-          ? remainingCents
-          : Math.round(cashCents * baseAmount / totalBase);
-        remainingCents -= itemCents;
+          ? cashCents - allocatedCents
+          : Math.round(baseAmount * (1 + commonVa / 100) * 100);
+        allocatedCents += itemCents;
         item.finalAmount = (itemCents / 100).toFixed(2);
         item.va = formatInputNumber(commonVa);
         item.calculationMode = "cash";
@@ -1442,7 +1577,211 @@
     }
 
     function hasItemContent(item) {
-      return ["name", "weight", "rate", "finalAmount", "va"].some((key) => cleanText(item[key]));
+      return ["name", "weight", "finalAmount", "va"].some((key) => cleanText(item[key]));
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey));
+        if (!saved || typeof saved !== "object") return createBlankState();
+        const savedDate = saved.savedDate || saved.date || todayIso();
+        const savedEstimates = savedDate === todayIso() && Array.isArray(saved.savedEstimates)
+          ? saved.savedEstimates.map(normalizeSavedEstimate)
+          : [];
+        const rate = cleanText(saved.silverRate)
+          || cleanText(((saved.items || []).find((item) => toNumber(item.rate) > 0) || {}).rate);
+        if (savedDate !== todayIso()) return createBlankState(rate, [], todayIso());
+        return {
+          date: todayIso(),
+          savedDate: todayIso(),
+          silverRate: rate,
+          customerName: saved.customerName || "",
+          customerPhone: saved.customerPhone || "",
+          cash: saved.cash || "",
+          items: Array.isArray(saved.items) && saved.items.length
+            ? saved.items.map((item) => normalizeItem(item, rate))
+            : [createEmptyItem(rate)],
+          savedEstimates
+        };
+      } catch {
+        return createBlankState();
+      }
+    }
+
+    function normalizeItem(item, fallbackRate = "") {
+      return {
+        ...createEmptyItem(fallbackRate),
+        ...item,
+        rate: cleanText(item && item.rate) || fallbackRate,
+        va: item && cleanText(item.va) !== "" ? formatInputNumber(item.va) : "",
+        calculationMode: item && ["va", "cash"].includes(item.calculationMode) ? item.calculationMode : "amount"
+      };
+    }
+
+    function normalizeSavedEstimate(record) {
+      const rate = cleanText(record.silverRate)
+        || cleanText(((record.items || []).find((item) => toNumber(item.rate) > 0) || {}).rate);
+      return {
+        id: record.id || createSavedEstimateId(),
+        printedAt: record.printedAt || new Date().toISOString(),
+        date: record.date || todayIso(),
+        customerName: record.customerName || "",
+        customerPhone: record.customerPhone || "",
+        silverRate: rate,
+        cash: record.cash || "",
+        items: Array.isArray(record.items) && record.items.length
+          ? record.items.map((item) => normalizeItem(item, rate))
+          : [createEmptyItem(rate)]
+      };
+    }
+
+    function saveState() {
+      localStorage.setItem(storageKey, JSON.stringify(state));
+    }
+
+    function persistAndRender() {
+      saveState();
+      render();
+    }
+
+    async function requestPersistentStorage() {
+      if (!navigator.storage || !navigator.storage.persist) return;
+      try {
+        await navigator.storage.persist();
+      } catch {}
+    }
+
+    function savePrintedEstimate() {
+      clearExpiredSavedEstimates();
+      const existingIndex = editingEstimateId
+        ? state.savedEstimates.findIndex((record) => record.id === editingEstimateId)
+        : -1;
+      const existingRecord = existingIndex >= 0 ? state.savedEstimates[existingIndex] : null;
+      const record = {
+        id: existingRecord ? existingRecord.id : createSavedEstimateId(),
+        printedAt: existingRecord ? existingRecord.printedAt : new Date().toISOString(),
+        date: todayIso(),
+        customerName: cleanText(state.customerName),
+        customerPhone: cleanText(state.customerPhone),
+        silverRate: cleanText(state.silverRate),
+        cash: cleanText(state.cash),
+        items: state.items.filter(hasItemContent).map((item) => normalizeItem(item, state.silverRate))
+      };
+      if (record.items.length === 0) record.items = [createEmptyItem(state.silverRate)];
+      if (existingIndex >= 0) state.savedEstimates[existingIndex] = record;
+      else state.savedEstimates.push(record);
+      editingEstimateId = "";
+      activeSavedEstimateId = "";
+      saveState();
+    }
+
+    function createSavedEstimateId() {
+      return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    }
+
+    function renderSavedEstimates() {
+      savedEstimatesList.innerHTML = "";
+      savedEstimatesEmpty.hidden = state.savedEstimates.length > 0;
+      state.savedEstimates.forEach((record) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "saved-record";
+        const isActive = activeSavedEstimateId === record.id;
+        wrapper.innerHTML = `
+          <button class="saved-name${isActive ? " is-active" : ""}" type="button" data-saved-name="${escapeAttribute(record.id)}">${escapeHtml(cleanText(record.customerName) || "Walk-in customer")}</button>
+          <div class="saved-actions"${isActive ? "" : " hidden"}>
+            <button class="btn" type="button" data-saved-action="edit" data-saved-id="${escapeAttribute(record.id)}">Edit</button>
+            <button class="btn" type="button" data-saved-action="reprint" data-saved-id="${escapeAttribute(record.id)}">Reprint</button>
+            <button class="btn btn-danger" type="button" data-saved-action="delete" data-saved-id="${escapeAttribute(record.id)}">Delete</button>
+          </div>
+        `;
+        savedEstimatesList.appendChild(wrapper);
+      });
+
+      savedEstimatesList.querySelectorAll("[data-saved-name]").forEach((button) => {
+        button.addEventListener("click", () => {
+          activeSavedEstimateId = activeSavedEstimateId === button.dataset.savedName ? "" : button.dataset.savedName;
+          renderSavedEstimates();
+        });
+      });
+      savedEstimatesList.querySelectorAll("[data-saved-action]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const id = button.dataset.savedId;
+          if (button.dataset.savedAction === "edit") editSavedEstimate(id);
+          if (button.dataset.savedAction === "reprint") reprintSavedEstimate(id);
+          if (button.dataset.savedAction === "delete") deleteSavedEstimate(id);
+        });
+      });
+    }
+
+    function stateFromSavedEstimate(record, existingState) {
+      const rate = cleanText(record.silverRate)
+        || cleanText((record.items.find((item) => toNumber(item.rate) > 0) || {}).rate)
+        || existingState.silverRate;
+      return {
+        date: todayIso(),
+        savedDate: existingState.savedDate,
+        silverRate: rate,
+        customerName: record.customerName || "",
+        customerPhone: record.customerPhone || "",
+        cash: record.cash || "",
+        items: record.items.map((item) => normalizeItem(item, rate)),
+        savedEstimates: existingState.savedEstimates
+      };
+    }
+
+    function editSavedEstimate(id) {
+      const record = state.savedEstimates.find((candidate) => candidate.id === id);
+      if (!record) return;
+      editingEstimateId = id;
+      activeSavedEstimateId = "";
+      state = stateFromSavedEstimate(record, state);
+      persistAndRender();
+    }
+
+    function reprintSavedEstimate(id) {
+      const record = state.savedEstimates.find((candidate) => candidate.id === id);
+      if (!record) return;
+      restoreStateAfterReprint = structuredClone(state);
+      state = stateFromSavedEstimate(record, restoreStateAfterReprint);
+      render();
+      applyPrintDensity();
+      window.print();
+    }
+
+    function deleteSavedEstimate(id) {
+      const record = state.savedEstimates.find((candidate) => candidate.id === id);
+      if (!record) return;
+      const customer = cleanText(record.customerName) || "Walk-in customer";
+      if (!window.confirm(`Delete the saved estimate for ${customer}?`)) return;
+      state.savedEstimates = state.savedEstimates.filter((candidate) => candidate.id !== id);
+      if (editingEstimateId === id) editingEstimateId = "";
+      activeSavedEstimateId = "";
+      persistAndRender();
+    }
+
+    function clearExpiredSavedEstimates() {
+      const today = todayIso();
+      if (state.savedDate === today) return false;
+      state.savedDate = today;
+      state.date = today;
+      state.savedEstimates = [];
+      editingEstimateId = "";
+      activeSavedEstimateId = "";
+      saveState();
+      if (savedEstimatesList) renderSavedEstimates();
+      scheduleMidnightCleanup();
+      return true;
+    }
+
+    function scheduleMidnightCleanup() {
+      if (midnightTimer) window.clearTimeout(midnightTimer);
+      const now = new Date();
+      const nextMidnight = new Date(now);
+      nextMidnight.setHours(24, 0, 1, 0);
+      midnightTimer = window.setTimeout(() => {
+        clearExpiredSavedEstimates();
+        scheduleMidnightCleanup();
+      }, nextMidnight.getTime() - now.getTime());
     }
 
     function applyPrintDensity() {
@@ -1458,81 +1797,6 @@
 
     function clearPrintDensity() {
       document.body.classList.remove("print-density-regular", "print-density-compact", "print-density-dense");
-    }
-
-    async function initializeAccessGate() {
-      const accessForm = document.getElementById("accessForm");
-      const accessCode = document.getElementById("accessCode");
-      const accessError = document.getElementById("accessError");
-      let appStarted = false;
-      const activeAccessCode = await resolveAccessCode();
-
-      function unlockApp() {
-        if (appStarted) return;
-        appStarted = true;
-        document.body.classList.add("access-granted");
-        sessionStorage.setItem(accessSessionKey, "true");
-        startApp();
-      }
-
-      if (!activeAccessCode) {
-        accessError.textContent = "Access code is not configured. Open this folder with a local server so the browser can read .env.";
-      }
-
-      if (activeAccessCode && sessionStorage.getItem(accessSessionKey) === "true") {
-        unlockApp();
-        return;
-      }
-
-      accessForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        if (!activeAccessCode) {
-          accessError.textContent = "Could not read .env. In Terminal run: python3 -m http.server 8000, then open http://localhost:8000/silver-estimate.html";
-          accessCode.focus();
-          return;
-        }
-        if (accessCode.value.trim() === activeAccessCode) {
-          accessError.textContent = "";
-          unlockApp();
-          return;
-        }
-        accessError.textContent = "Incorrect access code.";
-        accessCode.value = "";
-        accessCode.focus();
-        const panel = accessForm.closest(".access-panel") || accessForm;
-        panel.classList.remove("access-shake");
-        void panel.offsetWidth;
-        panel.classList.add("access-shake");
-      });
-    }
-
-    async function resolveAccessCode() {
-      const placeholder = ["__ACCESS", "_CODE__"].join("");
-      if (ACCESS_CODE !== placeholder) return ACCESS_CODE.trim();
-      return parseEnvSecret(await readLocalEnv());
-    }
-
-    async function readLocalEnv() {
-      try {
-        const response = await fetch(".env", { cache: "no-store" });
-        if (response.ok) return response.text();
-      } catch {}
-      return new Promise((resolve) => {
-        try {
-          const request = new XMLHttpRequest();
-          request.open("GET", ".env", true);
-          request.onload = () => resolve(request.status === 0 || request.status === 200 ? request.responseText : "");
-          request.onerror = () => resolve("");
-          request.send();
-        } catch {
-          resolve("");
-        }
-      });
-    }
-
-    function parseEnvSecret(envText) {
-      const match = String(envText || "").match(/^SECRET=(.*)$/m);
-      return match ? match[1].trim().replace(/^['"]|['"]$/g, "") : "";
     }
 
     function todayIso() {
@@ -1555,8 +1819,14 @@
     }
 
     function formatInputNumber(value) {
-      const rounded = Math.abs(toNumber(value)) < 0.0000005 ? 0 : Number(toNumber(value).toFixed(6));
-      return String(rounded);
+      return String(roundPercentage(value));
+    }
+
+    function roundPercentage(value) {
+      const number = toNumber(value);
+      const sign = number < 0 ? -1 : 1;
+      const rounded = sign * Math.round((Math.abs(number) + Number.EPSILON) * 100) / 100;
+      return Object.is(rounded, -0) ? 0 : rounded;
     }
 
     function formatMoney(value) {

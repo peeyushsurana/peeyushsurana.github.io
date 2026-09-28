@@ -14,7 +14,7 @@ Silver estimate page:
 https://peeyushsurana.github.io/silver-estimate.html
 ```
 
-Both apps run fully in the browser. They use the same access-code screen generated from a GitHub repository secret named `SECRET` during deployment.
+Both apps run fully in the browser. The Gold app uses an access-code screen generated from the GitHub repository secret named `SECRET`; the Silver app opens without a password.
 
 ## Files In This Repository
 
@@ -95,7 +95,7 @@ For a fine-grained Personal Access Token, choose the repository `peeyushsurana.g
 
 ## Deploy With GitHub Pages
 
-For these apps, GitHub Pages should deploy using GitHub Actions because the workflow reads the repository secret named `SECRET` and adds the same access-code check to both the Gold and Silver pages.
+GitHub Pages deploys through GitHub Actions. The workflow reads the repository secret named `SECRET` and adds the access-code check to the Gold page. The Silver page opens without a password.
 
 Before the first deployment:
 
@@ -124,9 +124,9 @@ https://peeyushsurana.github.io/gold-estimate.html
 
 If it does not appear, open the repository and click `Actions`. The latest workflow run should show whether deployment succeeded or failed.
 
-## Access Code And Security
+## Gold Access Code And Security
 
-The access code is the value stored in the GitHub repository secret named `SECRET`.
+The Gold access code is the value stored in the GitHub repository secret named `SECRET`. The Silver page does not use an access code.
 
 Important: this is a simple access gate for a static website. It keeps the plain access code out of the repository, but it is not the same as server-side login. A determined technical person may still bypass client-side checks on a public static site.
 
@@ -142,11 +142,11 @@ The app also asks the browser for persistent storage to reduce the chance that s
 
 In the Gold app, enter the shared Gold Rate once and it remains saved until changed. VA and Final Amount work in both directions for each item. When Cash, Card, or UPI is entered, their combined Total Paid becomes the controlling net payable and the app applies the same VA percentage-point adjustment to every eligible item, preserving the difference between item VA rates. `Clear All` permanently removes saved-estimate history from the current browser while keeping the next estimate number in sequence.
 
-The Silver estimate is print-only. It does not save Silver estimates or change the Gold saved-estimate history. Its VA and Final Amount fields work in both directions: entering VA calculates Final Amount, while entering Final Amount calculates VA. When Cash is entered, Cash becomes the controlling invoice total and is distributed proportionally across all valid item rows.
+The Silver app stores printed estimates locally until the end of the current day, then clears that Silver history automatically. Saved entries are listed by customer name and support Edit, Reprint, and Delete. The shared Silver Rate remains saved until changed. VA and Final Amount work in both directions, and Cash remains the controlling invoice total when entered. Silver storage is separate from Gold history.
 
 ## Test Locally With `.env`
 
-For local testing, `gold-estimate.html` tries to read `.env` from the same folder.
+For local testing, only `gold-estimate.html` reads `.env` from the same folder.
 
 Create `.env`:
 
@@ -174,7 +174,7 @@ For the Silver estimate, open:
 http://localhost:8000/silver-estimate.html
 ```
 
-Both pages read the same `SECRET` value from `.env` during local testing.
+The Silver page does not require the `SECRET` value.
 
 Do not commit `.env`; it is ignored by `.gitignore`.
 
